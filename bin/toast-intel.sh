@@ -11,6 +11,8 @@ AATMVERSION=0.5
 P=10
 ENVNAME=toast-intel-fftw
 prefix="$SCRATCH/local/$ENVNAME"
+# * assume FFTW from system's package manager
+FFTWPATH=/usr
 
 mkdir -p "$prefix" && cd "$prefix"
 
@@ -88,7 +90,7 @@ CC=icc \
 MPICC=mpicc \
 CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
 ./configure \
-    --with-fftw=/usr \
+    --with-fftw="$FFTWPATH" \
     --prefix="$prefix"
 
 make -j$P
@@ -123,7 +125,7 @@ cmake \
     -DPYTHON_EXECUTABLE:FILEPATH=$(which python) \
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
     -DCMAKE_INSTALL_PREFIX="$prefix" \
-    -DFFTW_ROOT=/usr \
+    -DFFTW_ROOT="$FFTWPATH" \
     ..
 
 make -j$P
