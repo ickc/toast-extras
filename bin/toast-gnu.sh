@@ -28,7 +28,6 @@ channels:
 - conda-forge
 dependencies:
 - python=3
-- intelpython3_core
 - ipykernel
 - numpy
 - scipy
