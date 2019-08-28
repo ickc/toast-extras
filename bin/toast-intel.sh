@@ -9,7 +9,7 @@ set -e
 CONDAMPI=true
 AATMVERSION=0.5
 P=10
-ENVNAME=toast-intel
+ENVNAME=toast-intel-fftw
 prefix="$SCRATCH/local/$ENVNAME"
 
 mkdir -p "$prefix" && cd "$prefix"
@@ -123,7 +123,7 @@ cmake \
     -DPYTHON_EXECUTABLE:FILEPATH=$(which python) \
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
     -DCMAKE_INSTALL_PREFIX="$prefix" \
-    -DFFTW_ROOT=/opt/intel/compilers_and_libraries/linux/mkl/include/fftw \
+    -DFFTW_ROOT=/usr \
     ..
 
 make -j$P
