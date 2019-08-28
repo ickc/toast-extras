@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # * using the master libmadam and toast
+# * TBB can't be found in SuiteSparse and TOAST
 
 set -e
 
@@ -14,8 +15,7 @@ prefix="$SCRATCH/local/$ENVNAME"
 mkdir -p "$prefix" && cd "$prefix"
 
 # assume Intel's env is loaded, e.g.
-# . /opt/intel/bin/iccvars.sh -arch intel64 -platform linux
-# . /opt/intel/bin/ifortvars.sh -arch intel64 -platform linux
+# . /opt/intel/bin/compilervars.sh -arch intel64
 
 # Install Python dep. via conda ##################################################################
 
@@ -26,6 +26,7 @@ channels:
 dependencies:
 - python=3
 - intelpython3_core
+- ipykernel
 - numpy
 - scipy
 - matplotlib
@@ -37,19 +38,20 @@ if [[ -n "$CONDAMPI" ]]; then
     echo '- mpi4py' >> env.yml
 fi
 
-#TODO
-cat env.yml
-
 conda env create -f env.yml -p "$prefix"
 rm -f env.yml
 
 . activate "$prefix"
 
 # mpi4py
+# * hardcoded the location of this script for now
 [[ -n "$CONDAMPI" ]] || ~/git/source/reproducible-os-environments/common/conda/cray-mpi4py.sh
 
 # ipython kernel
 python -m ipykernel install --user --name "$ENVNAME" --display-name "$ENVNAME"
+
+# make sure the following dep. are not conda's
+conda deactivate
 
 # AATM ##########################################################################################
 
@@ -58,7 +60,7 @@ cd "$prefix/git"
 wget -qO- "https://launchpad.net/aatm/trunk/0.5/+download/aatm-${AATMVERSION}.tar.gz" | tar -xzf -
 cd "aatm-$AATMVERSION"
 
-# gcc
+# somehow icc doesn't work here
 CC=gcc \
 CXX=g++ \
 CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
@@ -86,10 +88,15 @@ CC=icc \
 MPICC=mpicc \
 CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
 ./configure \
+    --with-fftw=/usr \
     --prefix="$prefix"
 
 make -j$P
 make install
+
+. activate "$prefix"
+# make sure intel paths has higher priorities then conda's
+. /opt/intel/bin/compilervars.sh -arch intel64
 
 cd python
 python setup.py install
@@ -116,6 +123,7 @@ cmake \
     -DPYTHON_EXECUTABLE:FILEPATH=$(which python) \
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
     -DCMAKE_INSTALL_PREFIX="$prefix" \
+    -DFFTW_ROOT=/opt/intel/compilers_and_libraries/linux/mkl/include/fftw \
     ..
 
 make -j$P
