@@ -24,6 +24,7 @@ mkdir -p "$prefix" && cd "$prefix"
 cat << EOF > env.yml
 channels:
 - intel
+- defaults
 - conda-forge
 dependencies:
 - python=3
@@ -34,6 +35,9 @@ dependencies:
 - matplotlib
 - pyephem
 - healpy
+- defaults::numba
+- toml
+- cython
 EOF
 
 if [[ -n "$CONDAMPI" ]]; then
@@ -103,6 +107,23 @@ make install
 cd python
 python setup.py install
 python setup.py test
+
+# libsharp #####################################################################
+
+cd "$prefix/git"
+git clone https://github.com/Libsharp/libsharp --branch master --single-branch --depth 1
+cd libsharp
+autoreconf
+
+# libsharp doesn't work with mpiicc
+CC=mpicc \
+CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+./configure --enable-mpi --enable-pic --prefix="$prefix"
+make -j$P
+cp -a auto/* "$prefix"
+cd python
+LIBSHARP="$prefix" CC="mpiicc -g" LDSHARED="mpiicc -g -shared" \
+    python setup.py install --prefix="$prefix"
 
 # toast ##########################################################################################
 
