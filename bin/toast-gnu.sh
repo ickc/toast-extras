@@ -6,7 +6,7 @@
 set -e
 
 # customize these
-CONDAMPI=true
+# CONDAMPI=true
 AATMVERSION=0.5
 P=10
 ENVNAME=toast-gnu-fftw
@@ -38,7 +38,7 @@ dependencies:
 EOF
 
 if [[ -n "$CONDAMPI" ]]; then
-    echo '- mpi4py' >> env.yml
+    echo '- conda-forge::mpi4py' >> env.yml
 fi
 
 conda env create -f env.yml -p "$prefix"
