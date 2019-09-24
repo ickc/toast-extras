@@ -113,14 +113,20 @@ python setup.py test
 cd "$prefix/git"
 git clone https://github.com/Libsharp/libsharp --branch master --single-branch --depth 1
 cd libsharp
+
+wget https://github.com/hpc4cmb/cmbenv/raw/master/pkgs/patch_libsharp
+patch -p1 < patch_libsharp
+
 autoreconf
 
 # libsharp doesn't work with mpiicc
-CC=mpicc \
+CC=mpiicc \
 CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
 ./configure --enable-mpi --enable-pic --prefix="$prefix"
 make -j$P
-cp -a auto/* "$prefix"
+# force overwrite in case it was installed previously
+# explicit path to override shell alias
+/usr/bin/cp -af auto/* "$prefix"
 cd python
 LIBSHARP="$prefix" CC="mpiicc -g" LDSHARED="mpiicc -g -shared" \
     python setup.py install --prefix="$prefix"
@@ -152,4 +158,4 @@ cmake \
 make -j$P
 make install
 
-python -c 'import toast.tests; toast.tests.run()'
+python -c 'from toast.tests import run; run()'
