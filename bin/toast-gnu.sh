@@ -130,4 +130,4 @@ cmake \
 make -j$P
 make install
 
-python -c 'import toast.tests; toast.tests.run()'
+python -c 'from toast.tests import run; run()'
