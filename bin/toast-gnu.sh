@@ -6,9 +6,9 @@
 set -e
 
 # customize these
-# CONDAMPI=true
+CONDAMPI=true
 AATMVERSION=0.5
-P=10
+P=${P-$(($(getconf _NPROCESSORS_ONLN) / 2))}
 ENVNAME=toast-gnu-fftw
 prefix="$SCRATCH/local/$ENVNAME"
 # * assume FFTW from system's package manager
@@ -16,8 +16,25 @@ FFTWPATH=/usr
 
 mkdir -p "$prefix" && cd "$prefix"
 
-# assume Intel's env is loaded, e.g.
-# . /opt/intel/bin/compilervars.sh -arch intel64
+# on macOS try this for dependencies
+# brew install fftw cfitsio suite-sparse
+# note that homebrew consistenly uses open-mpi
+# see https://github.com/Homebrew/homebrew-core/issues/36871
+# compile from source to force open-mpi built with gcc
+# brew install mpich fftw gmp --build-from-source
+
+if [[ $(uname) == Darwin ]]; then
+    GCC=gcc-9
+    GXX=g++-9
+    MPIFORT=/usr/local/bin/mpifort
+else
+    GCC=gcc
+    GXX=g++
+    MPIFORT=mpifort
+fi
+
+MPICC=mpicc
+MPICXX=mpicxx
 
 # Install Python dep. via conda ##################################################################
 
@@ -41,7 +58,7 @@ if [[ -n "$CONDAMPI" ]]; then
     echo '- conda-forge::mpi4py' >> env.yml
 fi
 
-conda env create -f env.yml -p "$prefix"
+# conda env create -f env.yml -p "$prefix"
 rm -f env.yml
 
 . activate "$prefix"
@@ -63,9 +80,8 @@ cd "$prefix/git"
 wget -qO- "https://launchpad.net/aatm/trunk/0.5/+download/aatm-${AATMVERSION}.tar.gz" | tar -xzf -
 cd "aatm-$AATMVERSION"
 
-# somehow icc doesn't work here
-CC=gcc \
-CXX=g++ \
+CC=$GCC \
+CXX=$GXX \
 CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
 CXXFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
 ./configure \
@@ -84,15 +100,29 @@ cd libmadam
 
 ./autogen.sh
 
-FC=gfortran \
-MPIFC=mpifort \
+if [[ $(uname) == Darwin ]]; then
+LIBRARY_PATH=/usr/local/Cellar/cfitsio/3.450_1/lib \
+LD_LIBRARY_PATH=$prefix/lib \
+FC=gfortran-9 \
+MPIFC=$MPIFORT \
 FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-CC=gcc \
-MPICC=mpicc \
+CC=$GCC \
+MPICC=$MPICC \
 CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
 ./configure \
     --with-fftw="$FFTWPATH" \
     --prefix="$prefix"
+else
+FC=gfortran \
+MPIFC=$MPIFORT \
+FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+CC=$GCC \
+MPICC=$MPICC \
+CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+./configure \
+    --with-fftw="$FFTWPATH" \
+    --prefix="$prefix"
+fi
 
 make -j$P
 make install
@@ -115,10 +145,10 @@ mkdir -p build
 cd build
 
 cmake \
-    -DCMAKE_C_COMPILER=gcc \
-    -DCMAKE_CXX_COMPILER=g++ \
-    -DMPI_C_COMPILER=mpicc \
-    -DMPI_CXX_COMPILER=mpicxx \
+    -DCMAKE_C_COMPILER=$GCC \
+    -DCMAKE_CXX_COMPILER=$GXX \
+    -DMPI_C_COMPILER=$MPICC \
+    -DMPI_CXX_COMPILER=$MPICXX \
     -DCMAKE_C_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
     -DCMAKE_CXX_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
     -DPYTHON_EXECUTABLE:FILEPATH=$(which python) \
