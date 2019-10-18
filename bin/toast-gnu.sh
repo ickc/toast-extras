@@ -106,7 +106,6 @@ cd libmadam
 ./autogen.sh
 
 if [[ $(uname) == Darwin ]]; then
-LIBRARY_PATH=/usr/local/Cellar/cfitsio/3.450_1/lib \
 LD_LIBRARY_PATH=$prefixCompile/lib \
 FC=gfortran-9 \
 MPIFC=$MPIFORT \
@@ -116,6 +115,9 @@ MPICC=$MPICC \
 CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
 ./configure \
     --with-fftw="$FFTWPATH" \
+    --with-blas='-L/usr/local/opt/openblas/lib -I/usr/local/opt/openblas/include' \
+    --with-lapack='-L/usr/local/opt/lapack/lib -I/usr/local/opt/lapack/include' \
+    --with-cfitsio='/usr/local/Cellar/cfitsio/3.450_1' \
     --prefix="$prefixCompile"
 else
 FC=gfortran \
