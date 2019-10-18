@@ -8,7 +8,7 @@ set -e
 # customize these
 CONDAMPI=true
 AATMVERSION=0.5
-P=10
+P=${P-$(($(getconf _NPROCESSORS_ONLN) / 2))}
 ENVNAME=toast-intel-fftw
 prefix="$SCRATCH/local/$ENVNAME"
 # * assume FFTW from system's package manager
