@@ -170,7 +170,6 @@ cmake \
 make -j$P
 make install
 
-# TODO: auto python version
 export PYTHONPATH="$(realpath $prefixCompile/lib/python*/site-packages):$PYTHONPATH"
 
 python -c 'from toast.tests import run; run()'
