@@ -3,8 +3,11 @@
 # * using the master libmadam and toast
 
 set -e
+DIR="${BASH_SOURCE[0]%/*}"
 
 # customize these
+# CONDAMPI=True
+# SYSTEMFFTW=True
 AATMVERSION=0.5
 P=${P-$(($(getconf _NPROCESSORS_ONLN) / 2))}
 ENVNAME=toast-gnu
@@ -12,8 +15,6 @@ prefixBase="$SCRATCH/local/$ENVNAME"
 prefixDownload="$prefixBase/git"
 prefixCompile="$prefixBase/compile"
 prefixConda="$prefixBase/conda"
-# * assume FFTW from system's package manager
-FFTWPATH=/usr
 
 # on macOS try this for dependencies
 # brew install fftw cfitsio suite-sparse
@@ -64,14 +65,25 @@ dependencies:
 - nbformat
 EOF
 
+if [[ -n "$CONDAMPI" ]]; then
+    echo '- mpi4py' >> env.yml
+fi
+
 conda env create -f env.yml -p "$prefixConda"
 # rm -f env.yml
 
 . activate "$prefixConda"
 
 # mpi4py
-# * hardcoded the location of this script for now
-[[ -n "$CONDAMPI" ]] || ~/git/source/reproducible-os-environments/common/conda/cray-mpi4py.sh
+# * hardcoded the location of these scripts for now
+[[ -n "$CONDAMPI" ]] || "$DIR/../../reproducible-os-environments/common/conda/cray-mpi4py.sh"
+if [[ -n "$SYSTEMFFTW" ]]; then
+    # * assume FFTW from system's package manager
+    FFTWPATH=/usr
+else
+    FFTWPATH="$prefixCompile"
+    "$DIR/../../reproducible-os-environments/install/fftw.sh"
+fi
 
 # ipython kernel
 python -m ipykernel install --user --name "$ENVNAME" --display-name "$ENVNAME"
@@ -136,12 +148,11 @@ make install
 
 . activate "$prefixConda"
 
-# TODO is installing to conda ok?
 cd python
 python setup.py install
 python setup.py test
 
-# conda deactivate
+conda deactivate
 
 # toast ##########################################################################################
 
@@ -156,6 +167,12 @@ cd toast
 mkdir -p build
 cd build
 
+if [[ $(uname) == Darwin ]]; then
+    export LDFLAGS="-L/usr/local/opt/openblas/lib -L/usr/local/opt/lapack/lib"
+    export CPPFLAGS="-I/usr/local/opt/openblas/include -I/usr/local/opt/lapack/include"
+    export PKG_CONFIG_PATH="/usr/local/opt/openblas/lib/pkgconfig:/usr/local/opt/lapack/lib/pkgconfig:$PKG_CONFIG_PATH"
+fi
+
 cmake \
     -DCMAKE_C_COMPILER=$GCC \
     -DCMAKE_CXX_COMPILER=$GXX \
@@ -163,7 +180,7 @@ cmake \
     -DMPI_CXX_COMPILER=$MPICXX \
     -DCMAKE_C_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
     -DCMAKE_CXX_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-    -DPYTHON_EXECUTABLE:FILEPATH="$(command -v python)" \
+    -DPYTHON_EXECUTABLE:FILEPATH="$prefixConda/bin/python" \
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
     -DCMAKE_INSTALL_PREFIX="$prefixCompile" \
     -DFFTW_ROOT="$FFTWPATH" \
