@@ -13,7 +13,7 @@ conda activate /scratch/local/toast-gnu/conda
 
 export LD_LIBRARY_PATH="/scratch/local/toast-gnu/compile/lib:$LD_LIBRARY_PATH"
 export PYTHONPATH="/scratch/local/toast-gnu/compile/lib/python3.7/site-packages:$PYTHONPATH"
-export PATH="$PATH:/scratch/local/toast-gnu/conda/bin"
+export PATH="/scratch/local/toast-gnu/compile/bin:/scratch/local/toast-gnu/conda/bin:$PATH"
 
 exec /scratch/local/toast-gnu/conda/bin/python -m ipykernel_launcher -f "$1"
 ```
