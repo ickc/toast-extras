@@ -14,9 +14,6 @@ prefix="$SCRATCH/local/$ENVNAME"
 # * assume FFTW from system's package manager
 FFTWPATH=/usr
 
-# for the build directory
-date=$(date +%Y%m%d)
-
 . activate "$prefix"
 # make sure intel paths has higher priorities then conda's
 . /opt/intel/bin/compilervars.sh -arch intel64
