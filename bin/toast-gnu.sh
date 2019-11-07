@@ -154,6 +154,32 @@ cd python
 python setup.py install
 python setup.py test
 
+conda deactivate
+
+# libsharp #####################################################################
+
+cd "$prefixDownload"
+git clone https://github.com/Libsharp/libsharp --branch master --single-branch --depth 1
+cd libsharp
+
+autoreconf
+
+CC=$MPICC \
+CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+./configure --enable-mpi --enable-pic --prefix="$prefixCompile"
+
+make -j$P
+
+# force overwrite in case it was installed previously
+# explicit path to override shell alias
+/usr/bin/cp -af auto/* "$prefixCompile"
+
+. activate "$prefixConda"
+
+cd python
+LIBSHARP="$prefixCompile" CC="$MPICC -g" LDSHARED="$MPICC -g -shared" \
+    python setup.py install --prefix="$prefixConda"
+
 # PySM ##########################################################################################
 
 cd "$prefixDownload"
@@ -161,26 +187,6 @@ git clone https://github.com/healpy/pysm.git
 cd pysm
 
 pip install .
-
-# libsharp #####################################################################
-
-cd "$prefix/git"
-git clone https://github.com/Libsharp/libsharp --branch master --single-branch --depth 1
-cd libsharp
-
-autoreconf
-
-# libsharp doesn't work with mpiicc
-CC=$MPICC \
-CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-./configure --enable-mpi --enable-pic --prefix="$prefix"
-make -j$P
-# force overwrite in case it was installed previously
-# explicit path to override shell alias
-/usr/bin/cp -af auto/* "$prefixCompile"
-cd python
-LIBSHARP="$prefixCompile" CC="$MPICC -g" LDSHARED="$MPICC -g -shared" \
-    python setup.py install --prefix="$prefixConda"
 
 conda deactivate
 
