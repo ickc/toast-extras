@@ -8,7 +8,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # customize these
 # CONDAMPI=True
 # SYSTEMFFTW=True
-AATMVERSION=0.5
 P=${P-$(($(getconf _NPROCESSORS_ONLN) / 2))}
 ENVNAME=toast-gnu
 prefixBase="$SCRATCH/local/$ENVNAME"
@@ -96,17 +95,17 @@ conda deactivate
 # AATM ##########################################################################################
 
 cd "$prefixDownload"
-wget -qO- "https://launchpad.net/aatm/trunk/0.5/+download/aatm-${AATMVERSION}.tar.gz" | tar -xzf -
-cd "aatm-$AATMVERSION"
+git clone https://github.com/hpc4cmb/libaatm.git
+cd "libaatm"
 
 CC=$GCC \
 CXX=$GXX \
 CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
 CXXFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
-./configure \
-    --prefix="$prefixCompile"
+cmake -DCMAKE_INSTALL_PREFIX="$prefixCompile" ..
 
 make -j$P
+make test
 make install
 
 # libmadam ##########################################################################################
