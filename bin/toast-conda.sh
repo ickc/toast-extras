@@ -73,7 +73,6 @@ echo 'Creating conda environment...'
 
 cat << EOF > env.yml
 channels:
-- defaults
 - conda-forge
 dependencies:
 - python=3
@@ -83,30 +82,30 @@ dependencies:
 - matplotlib
 - pyephem
 - healpy
-- 'numba>=0.45'
+- numba
 - toml
 - cython
 - mypy
 - pylint
-- 'plotly>=4.1'
+- plotly
 - nbformat
-- 'astropy>=3.1'
+- astropy
 - configobj
-- conda-forge::mpi4py
-- conda-forge::mpich-mpicc
-- conda-forge::mpich-mpicxx
-- conda-forge::mpich-mpifort
-- conda-forge::fftw
-- conda-forge::libaatm
-- conda-forge::cfitsio
-- conda-forge::automake
-- conda-forge::libtool
-- conda-forge::libgfortran
-- conda-forge::libblas
-- conda-forge::liblapack
-- conda-forge::lapack
-- conda-forge::suitesparse
-- conda-forge::libsharp
+- mpi4py
+- mpich-mpicc
+- mpich-mpicxx
+- mpich-mpifort
+- fftw
+- libaatm
+- cfitsio
+- automake
+- libtool
+- libgfortran
+- libblas=*=*mkl
+- liblapack=*=*mkl
+- lapack
+- suitesparse
+- libsharp
 EOF
 
 "$CONDA_PREFIX/bin/conda" env create -f env.yml -p "$PREFIX"
