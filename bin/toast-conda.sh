@@ -8,7 +8,7 @@ set -e
 PREFIX="${PREFIX-"$SCRATCH/local/toast-conda"}"
 
 # c.f. https://unix.stackexchange.com/questions/98829/how-to-start-a-script-with-clean-environment?noredirect=1&lq=1
-[[ -z "$IS_CLEAN_ENVIRONMENT" ]] && exec /usr/bin/env -i IS_CLEAN_ENVIRONMENT=1 CONDA_PREFIX="$CONDA_PREFIX" PREFIX="$PREFIX" bash "$0" "$@"
+[[ -z "$IS_CLEAN_ENVIRONMENT" ]] && exec /usr/bin/env -i IS_CLEAN_ENVIRONMENT=1 CONDA_PREFIX="$CONDA_PREFIX" PREFIX="$PREFIX" TERM="$TERM" bash "$0" "$@"
 unset IS_CLEAN_ENVIRONMENT
 
 # helpers ###############################################################
