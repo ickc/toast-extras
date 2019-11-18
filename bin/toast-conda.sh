@@ -23,7 +23,7 @@ print_line () {
 
 # getopts ##############################################################
 
-version='0.1'
+version='0.1.1'
 
 usage="${BASH_SOURCE[0]} [-h] [-p prefix] --- Install TOAST software stack through conda
 
@@ -153,6 +153,8 @@ cd toast
 mkdir -p build
 cd build
 
+[[ $(uname) == Darwin ]] && LIBEXT=dylib || LIBEXT=so
+
 cmake \
     -DCMAKE_INSTALL_PREFIX="$PREFIX" \
     -DCMAKE_C_COMPILER="$CC" \
@@ -162,8 +164,8 @@ cmake \
     -DMPI_C_COMPILER="$(which mpicc)" \
     -DMPI_CXX_COMPILER="$(which mpicxx)" \
     -DPYTHON_EXECUTABLE:FILEPATH="$PREFIX/bin/python" \
-    -DBLAS_LIBRARIES="$PREFIX/lib/libblas.so" \
-    -DLAPACK_LIBRARIES="$PREFIX/lib/liblapack.so" \
+    -DBLAS_LIBRARIES="$PREFIX/lib/libblas.$LIBEXT" \
+    -DLAPACK_LIBRARIES="$PREFIX/lib/liblapack.$LIBEXT" \
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
     -DFFTW_ROOT="$PREFIX" \
     -DSUITESPARSE_INCLUDE_DIR_HINTS="$PREFIX/include" \
