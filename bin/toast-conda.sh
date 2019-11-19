@@ -156,7 +156,8 @@ print_double_line
 echo 'Installing libmadam...'
 
 mkdir -p "$PREFIX/git" && cd "$PREFIX/git"
-git clone git@github.com:hpc4cmb/libmadam.git
+git clone git@github.com:hpc4cmb/libmadam.git ||
+git clone https://github.com/hpc4cmb/libmadam.git
 cd libmadam
 
 print_line
@@ -192,6 +193,7 @@ print_double_line
 echo 'Installing pysm...'
 
 cd "$PREFIX/git"
+git clone git@github.com:healpy/pysm.git ||
 git clone https://github.com/healpy/pysm.git
 cd pysm
 
@@ -203,7 +205,8 @@ print_double_line
 echo 'Installing TOAST...'
 
 cd "$PREFIX/git"
-git clone git@github.com:hpc4cmb/toast.git
+git clone git@github.com:hpc4cmb/toast.git ||
+git clone https://github.com/hpc4cmb/toast.git
 cd toast
 
 mkdir -p build
