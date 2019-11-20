@@ -103,7 +103,7 @@ check_file "$CONDA_PREFIX/bin/activate" "$ERR_MSG"
 
 print_double_line
 echo 'Creating conda environment...'
-mkdirerr "$PREFIX" 'Make sure you have permission or change the prefix specified in -p.'
+mkdirerr "$PREFIX/git" 'Make sure you have permission or change the prefix specified in -p.'
 
 cat << EOF > env.yml
 channels:
@@ -171,7 +171,6 @@ pip install https://github.com/healpy/pysm/archive/master.zip
 print_double_line
 echo 'Installing libmadam...'
 
-mkdir -p "$PREFIX/git" && cd "$PREFIX/git"
 git clone git@github.com:hpc4cmb/libmadam.git ||
 git clone https://github.com/hpc4cmb/libmadam.git
 cd libmadam
