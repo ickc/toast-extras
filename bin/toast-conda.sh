@@ -139,7 +139,6 @@ dependencies:
 - liblapack=*=*mkl
 - lapack
 - suitesparse
-- libsharp
 EOF
 
 "$CONDA_PREFIX/bin/conda" env create -f env.yml -p "$PREFIX"
@@ -189,6 +188,39 @@ python setup.py install
 print_line
 echo 'Run libmadam test...'
 python setup.py test
+
+# libsharp #############################################################
+
+if [[ $(uname) == Darwin ]]; then
+    print_double_line
+    echo 'This script does not support installing libsharp on macOS yet. Skipping...'
+else
+
+print_double_line
+echo 'Installing libsharp...'
+
+cd "$PREFIX/git"
+git clone git@github.com:Libsharp/libsharp.git --branch master --single-branch --depth 1 ||
+git clone https://github.com/Libsharp/libsharp --branch master --single-branch --depth 1
+cd libsharp
+
+autoreconf
+
+CC="$CC" \
+CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+./configure --enable-mpi --enable-pic --prefix="$PREFIX"
+
+make -j"$N_CORES"
+
+# force overwrite in case it was installed previously
+# explicit path to override shell alias
+/usr/bin/cp -af auto/* "$PREFIX"
+
+cd python
+LIBSHARP="$PREFIX" CC="$(command -v mpicc) -g" LDSHARED="$(command -v mpicc) -g -shared" \
+    python setup.py install --prefix="$PREFIX"
+
+fi
 
 # PySM #################################################################
 
