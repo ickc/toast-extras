@@ -14,9 +14,6 @@ exec /usr/bin/env -i \
     CONDA_PREFIX="$CONDA_PREFIX" \
     PREFIX="$PREFIX" \
     TERM="$TERM" \
-    TMPDIR="$TMPDIR" \
-    TEMP="$TEMP" \
-    TMP="$TMP" \
     bash "$0" "$@"
 unset IS_CLEAN_ENVIRONMENT
 
