@@ -152,6 +152,20 @@ echo "Environment created in $PREFIX, activating and installing the ipykernel...
 ENVNAME="${PREFIX##*/}"
 python -m ipykernel install --user --name "$ENVNAME" --display-name "$ENVNAME"
 
+# PySM #################################################################
+
+print_double_line
+echo 'Installing pysm...'
+
+cd "$PREFIX/git"
+git clone git@github.com:healpy/pysm.git ||
+git clone https://github.com/healpy/pysm.git
+cd pysm
+
+# on comet it has strange permission errors if it is a git repo
+pip install . ||
+pip install https://github.com/healpy/pysm/archive/master.zip
+
 # libmadam #############################################################
 
 print_double_line
@@ -221,18 +235,6 @@ LIBSHARP="$PREFIX" CC="$(command -v mpicc) -g" LDSHARED="$(command -v mpicc) -g 
     python setup.py install --prefix="$PREFIX"
 
 fi
-
-# PySM #################################################################
-
-print_double_line
-echo 'Installing pysm...'
-
-cd "$PREFIX/git"
-git clone git@github.com:healpy/pysm.git ||
-git clone https://github.com/healpy/pysm.git
-cd pysm
-
-pip install .
 
 # toast ################################################################
 
