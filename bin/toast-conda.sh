@@ -30,8 +30,8 @@ print_line () {
 }
 
 printerr () {
-	printf "%s\\n" "$@" >&2
-	exit 1
+    printf "%s\\n" "$@" >&2
+    exit 1
 }
 
 mkdirerr () {
@@ -61,8 +61,8 @@ version='0.1.3'
 usage="${BASH_SOURCE[0]} [-h] [-p prefix] --- Install TOAST software stack through conda
 
 where:
-	-h	show this help message
-	-p	prefix directory
+    -h  show this help message
+    -p  prefix directory
 
 version: $version
 "
@@ -72,15 +72,15 @@ OPTIND=1
 
 # get the options
 while getopts "p:h" opt; do
-	case "$opt" in
-	p)	PREFIX="$OPTARG"
-		;;
-	h)	printf "$usage"
+    case "$opt" in
+    p)  PREFIX="$OPTARG"
+        ;;
+    h)  printf "$usage"
         exit 0
-		;;
-	*)	printf "$usage"
+        ;;
+    *)  printf "$usage"
         exit 1
-	esac
+    esac
 done
 
 # intro ################################################################
