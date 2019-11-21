@@ -129,6 +129,7 @@ dependencies:
 - libaatm
 - cfitsio
 - suitesparse
+- cmake
 - automake
 - libtool
 - libgfortran
