@@ -14,6 +14,7 @@ exec /usr/bin/env -i \
     CONDA_PREFIX="$CONDA_PREFIX" \
     PREFIX="$PREFIX" \
     TERM="$TERM" \
+    HOME="$HOME" \
     bash "$0" "$@"
 unset IS_CLEAN_ENVIRONMENT
 
