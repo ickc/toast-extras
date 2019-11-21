@@ -56,7 +56,7 @@ check_var () {
 
 # getopts ##############################################################
 
-version='0.1.2'
+version='0.1.3'
 
 usage="${BASH_SOURCE[0]} [-h] [-p prefix] --- Install TOAST software stack through conda
 
