@@ -85,22 +85,21 @@ done
 
 # intro ################################################################
 
-print_double_line
-echo "Started with a clean environment:"
-printenv
+check_env () {
 
-print_line
-echo "Checking conda..."
-ERR_MSG='Try installing or loading conda environment to continue.'
+local ERR_MSG='Try installing or loading conda environment to continue.'
 check_var CONDA_PREFIX "$ERR_MSG"
 check_file "$CONDA_PREFIX/bin/conda" "$ERR_MSG"
 check_file "$CONDA_PREFIX/bin/activate" "$ERR_MSG"
+mkdirerr "$PREFIX/git" 'Make sure you have permission or change the prefix specified in -p.'
+
+}
 
 # conda ################################################################
 
-print_double_line
-echo 'Creating conda environment...'
-mkdirerr "$PREFIX/git" 'Make sure you have permission or change the prefix specified in -p.'
+install_conda () {
+
+cd "$PREFIX"
 
 cat << EOF > env.yml
 channels:
@@ -129,30 +128,27 @@ dependencies:
 - fftw
 - libaatm
 - cfitsio
+- suitesparse
 - automake
 - libtool
 - libgfortran
 - libblas=*=*mkl
 - liblapack=*=*mkl
 - lapack
-- suitesparse
 EOF
 
 "$CONDA_PREFIX/bin/conda" env create -f env.yml -p "$PREFIX"
 
-print_line
-echo "Environment created in $PREFIX, activating and installing the ipykernel..."
+}
 
-. "$CONDA_PREFIX/bin/activate" "$PREFIX"
-
-# ipython kernel
-ENVNAME="${PREFIX##*/}"
-python -m ipykernel install --user --name "$ENVNAME" --display-name "$ENVNAME"
+install_ipykernel () {
+    local ENVNAME="${PREFIX##*/}"
+    python -m ipykernel install --user --name "$ENVNAME" --display-name "$ENVNAME"
+}
 
 # PySM #################################################################
 
-print_double_line
-echo 'Installing pysm...'
+install_pysm () {
 
 cd "$PREFIX/git"
 git clone git@github.com:healpy/pysm.git ||
@@ -163,11 +159,13 @@ cd pysm
 pip install . ||
 pip install https://github.com/healpy/pysm/archive/master.zip
 
+}
+
 # libmadam #############################################################
 
-print_double_line
-echo 'Installing libmadam...'
+install_libmadam () {
 
+cd "$PREFIX/git"
 git clone git@github.com:hpc4cmb/libmadam.git ||
 git clone https://github.com/hpc4cmb/libmadam.git
 cd libmadam
@@ -199,43 +197,52 @@ print_line
 echo 'Run libmadam test...'
 python setup.py test
 
+}
+
 # libsharp #############################################################
 
-if [[ $(uname) == Darwin ]]; then
-    print_double_line
-    echo 'This script does not support installing libsharp on macOS yet. Skipping...'
-else
-
-print_double_line
-echo 'Installing libsharp...'
+install_libsharp () {
 
 cd "$PREFIX/git"
 git clone git@github.com:Libsharp/libsharp.git --branch master --single-branch --depth 1 ||
 git clone https://github.com/Libsharp/libsharp --branch master --single-branch --depth 1
 cd libsharp
 
+print_line
+echo 'Running autoreconf...'
 autoreconf
 
+print_line
+echo 'Running configure...'
 CC="$CC" \
 CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
 ./configure --enable-mpi --enable-pic --prefix="$PREFIX"
 
+print_line
+echo 'Running make...'
 make -j"$N_CORES"
 
+print_line
+echo "Installing by copying to $PREFIX..."
 # force overwrite in case it was installed previously
 # explicit path to override shell alias
 /usr/bin/cp -af auto/* "$PREFIX"
 
+print_line
+echo 'Run libsharp test...'
+make test
+
+print_line
+echo 'Installing libsharp Python wrapper...'
 cd python
 LIBSHARP="$PREFIX" CC="$(command -v mpicc) -g" LDSHARED="$(command -v mpicc) -g -shared" \
     python setup.py install --prefix="$PREFIX"
 
-fi
+}
 
 # toast ################################################################
 
-print_double_line
-echo 'Installing TOAST...'
+install_toast () {
 
 cd "$PREFIX/git"
 git clone git@github.com:hpc4cmb/toast.git ||
@@ -278,3 +285,53 @@ make install -j"$N_CORES"
 print_line
 echo 'Run TOAST test...'
 python -c 'from toast.tests import run; run()'
+
+}
+
+# main #################################################################
+
+main () {
+    # intro
+    print_double_line
+    echo "Started with a clean environment:"
+    printenv
+
+    print_double_line
+    echo "Checking environment..."
+    check_env
+
+    # conda
+    print_double_line
+    echo 'Creating conda environment...'
+    install_conda
+
+    print_double_line
+    echo "Environment created in $PREFIX, activating and installing the ipykernel..."
+    . "$CONDA_PREFIX/bin/activate" "$PREFIX"
+
+    print_double_line
+    echo 'Installing ipython kernel...'
+    install_ipykernel
+
+    # PySM
+    print_double_line
+    echo 'Installing pysm...'
+    install_pysm
+
+    # libmadam
+    print_double_line
+    echo 'Installing libmadam...'
+    install_libmadam
+
+    # libsharp
+    print_double_line
+    echo 'Installing libsharp...'
+    install_libsharp || echo 'Having trouble installing libsharp, skipping...'
+
+    # toast
+    print_double_line
+    echo 'Installing TOAST...'
+    install_toast
+}
+
+main
