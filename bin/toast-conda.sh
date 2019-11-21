@@ -121,6 +121,10 @@ dependencies:
 - cython
 - mypy
 - pylint
+- pydocstyle
+- flake8
+- bandit
+- pytest
 - plotly
 - nbformat
 - astropy
@@ -139,6 +143,8 @@ dependencies:
 - libblas=*=*mkl
 - liblapack=*=*mkl
 - lapack
+- pip:
+  - quaternionarray
 EOF
 
 [[ -z "$MINIMAL" ]] && echo '- cmake' >> env.yml || echo '- toast' >> env.yml
