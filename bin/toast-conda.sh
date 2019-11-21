@@ -58,11 +58,12 @@ check_var () {
 
 version='0.1.3'
 
-usage="${BASH_SOURCE[0]} [-h] [-p prefix] --- Install TOAST software stack through conda
+usage="${BASH_SOURCE[0]} [-mh] [-p prefix] --- Install TOAST software stack through conda
 
 where:
     -h  show this help message
     -p  prefix directory
+    -m  avoid git clone and compile whenever possible. e.g. you won't be able to develop TOAST.
 
 version: $version
 "
@@ -74,6 +75,8 @@ OPTIND=1
 while getopts "p:h" opt; do
     case "$opt" in
     p)  PREFIX="$OPTARG"
+        ;;
+    m)  MINIMAL=1
         ;;
     h)  printf "$usage"
         exit 0
@@ -129,7 +132,6 @@ dependencies:
 - libaatm
 - cfitsio
 - suitesparse
-- cmake
 - automake
 - libtool
 - libgfortran
@@ -137,6 +139,8 @@ dependencies:
 - liblapack=*=*mkl
 - lapack
 EOF
+
+[[ -z "$MINIMAL" ]] && echo '- cmake' >> env.yml || echo '- toast' >> env.yml
 
 "$CONDA_PREFIX/bin/conda" env create -f env.yml -p "$PREFIX"
 
@@ -151,6 +155,8 @@ install_ipykernel () {
 
 install_pysm () {
 
+if [[ -z "$MINIMAL" ]]; then
+
 cd "$PREFIX/git"
 git clone git@github.com:healpy/pysm.git ||
 git clone https://github.com/healpy/pysm.git
@@ -159,6 +165,12 @@ cd pysm
 # on comet it has strange permission errors if it is a git repo
 pip install . ||
 pip install https://github.com/healpy/pysm/archive/master.zip
+
+else
+
+pip install https://github.com/healpy/pysm/archive/master.zip
+
+fi
 
 }
 
@@ -245,6 +257,8 @@ LIBSHARP="$PREFIX" CC="$(command -v mpicc) -g" LDSHARED="$(command -v mpicc) -g 
 
 install_toast () {
 
+if [[ -z "$MINIMAL" ]]; then
+
 cd "$PREFIX/git"
 git clone git@github.com:hpc4cmb/toast.git ||
 git clone https://github.com/hpc4cmb/toast.git
@@ -282,6 +296,10 @@ make -j"$N_CORES"
 print_line
 echo 'Running make install...'
 make install -j"$N_CORES"
+
+else
+    echo 'Not compiling TOAST as you required a minimal build. Skipping...'
+fi
 
 print_line
 echo 'Run TOAST test...'
