@@ -40,24 +40,16 @@ mkdirerr () {
 }
 
 check_file () {
-    if [[ -f "$1" ]]; then
-        echo "$1 exists."
-    else
-        printerr "$1 not found! $2"
-    fi
+    [[ -f "$1" ]] && echo "$1 exists." || printerr "$1 not found! $2"
 }
 
 check_var () {
-    if [[ -z "${!1}" ]]; then
-        printerr "$1 is not defined! $2"
-    else
-        echo "$1 is defined."
-    fi
+    [[ -n "${!1}" ]] && echo "$1 is defined." || printerr "$1 is not defined! $2"
 }
 
 # getopts ##############################################################
 
-version='0.1.4'
+version='0.1.5'
 
 usage="${BASH_SOURCE[0]} [-mh] [-p prefix] --- Install TOAST software stack through conda
 
@@ -161,29 +153,28 @@ install_ipykernel () {
 # PySM #################################################################
 
 install_pysm () {
+    if [[ -z "$MINIMAL" ]]; then
+        {
+            cd "$PREFIX/git"
+            git clone git@github.com:healpy/pysm.git ||
+            git clone https://github.com/healpy/pysm.git
+            cd pysm
 
-if [[ -z "$MINIMAL" ]]; then
-
-cd "$PREFIX/git"
-git clone git@github.com:healpy/pysm.git ||
-git clone https://github.com/healpy/pysm.git
-cd pysm
-
-# on comet it has strange permission errors if it is a git repo
-pip install . ||
-pip install https://github.com/healpy/pysm/archive/master.zip
-
-else
-
-pip install https://github.com/healpy/pysm/archive/master.zip
-
-fi
-
+            # on comet it has strange permission errors if it is a git repo
+            pip install -e .
+        } || {
+            printf "%s\\n" "Cannot install pysm from git, try again from zip..." >&2
+            rm -rf "$PREFIX/git/pysm"
+            pip install https://github.com/healpy/pysm/archive/master.zip
+        }
+    else
+        pip install https://github.com/healpy/pysm/archive/master.zip
+    fi
 }
 
 # libmadam #############################################################
 
-install_libmadam () {
+install_libmadam () (
 
 cd "$PREFIX/git"
 git clone git@github.com:hpc4cmb/libmadam.git ||
@@ -217,11 +208,11 @@ print_line
 echo 'Run libmadam test...'
 python setup.py test
 
-}
+)
 
 # libsharp #############################################################
 
-install_libsharp () {
+install_libsharp () (
 
 cd "$PREFIX/git"
 git clone git@github.com:Libsharp/libsharp.git --branch master --single-branch --depth 1 ||
@@ -258,11 +249,11 @@ cd python
 LIBSHARP="$PREFIX" CC="$(command -v mpicc) -g" LDSHARED="$(command -v mpicc) -g -shared" \
     python setup.py install --prefix="$PREFIX"
 
-}
+)
 
 # toast ################################################################
 
-install_toast () {
+install_toast () (
 
 if [[ -z "$MINIMAL" ]]; then
 
@@ -312,11 +303,11 @@ print_line
 echo 'Run TOAST test...'
 python -c 'from toast.tests import run; run()'
 
-}
+)
 
 # main #################################################################
 
-main () {
+main () (
     # intro
     print_double_line
     echo "Started with a clean environment:"
@@ -358,6 +349,6 @@ main () {
     print_double_line
     echo 'Installing TOAST...'
     install_toast
-}
+)
 
 main
