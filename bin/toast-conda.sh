@@ -135,6 +135,7 @@ dependencies:
 - libblas=*=*mkl
 - liblapack=*=*mkl
 - lapack
+- pip
 - pip:
   - quaternionarray
 EOF
