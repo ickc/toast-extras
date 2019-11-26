@@ -185,7 +185,7 @@ cd "$prefixDownload"
 git clone https://github.com/healpy/pysm.git
 cd pysm
 
-pip install .
+pip install -e .
 
 conda deactivate
 
