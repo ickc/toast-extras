@@ -189,6 +189,39 @@ pip install -e .
 
 conda deactivate
 
+# libconviqt #####################################################################################
+
+cd "$prefixDownload"
+git clone git@github.com:hpc4cmb/libconviqt.git
+cd libconviqt
+
+./autogen.sh
+
+CC=$MPICC \
+CXX=$MPICXX \
+MPICC=$MPICC \
+MPICXX=$MPICXX \
+CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native -std=gnu99" \
+CXXFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+OPENMP_CFLAGS='-fopenmp' \
+OPENMP_CXXFLAGS='-fopenmp' \
+LDFLAGS='-fopenmp -lpthread' \
+./configure \
+    --prefix="$prefixCompile"
+
+
+make -j$P
+make check
+make install
+
+. activate "$prefixConda"
+
+cd python
+python setup.py install --prefix="$prefixConda"
+python setup.py test
+
+conda deactivate
+
 # toast ##########################################################################################
 
 # * assume suite-sparse installed using system's package manager
