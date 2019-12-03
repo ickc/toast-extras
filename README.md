@@ -2,7 +2,12 @@
 
 Stuffs related to toast
 
-# Loading TOAST in JupyterLab
+# Loading TOAST
+
+Adapt these to your environment,
+
+- prefix to TOAST
+- `python3.7`
 
 ## GNU
 
@@ -30,6 +35,14 @@ exec /scratch/local/toast-gnu/conda/bin/python -m ipykernel_launcher -f "$1"
 }
 ```
 
+To use it with vscode, (see <https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file>)
+
+```sh
+# ${workspaceFolder}/.env
+LD_LIBRARY_PATH=${SCRATCH}/local/toast-gnu/compile/lib:${LD_LIBRARY_PATH}
+PYTHONPATH=${SCRATCH}/local/toast-gnu/compile/lib/python3.7/site-packages:${PYTHONPATH}
+PATH=${SCRATCH}/local/toast-gnu/compile/bin:${SCRATCH}/local/toast-gnu/conda/bin:${PATH}
+```
 
 ## Intel
 
