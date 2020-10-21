@@ -167,6 +167,7 @@ install_pysm () {
             pip install -e .
         } || {
             printf "%s\\n" "Cannot install pysm from git, try again from zip..." >&2
+            cd "$PREFIX/git"
             rm -rf "$PREFIX/git/pysm"
             pip install https://github.com/healpy/pysm/archive/master.zip
         }
