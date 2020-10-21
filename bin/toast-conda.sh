@@ -18,7 +18,9 @@ exec /usr/bin/env -i \
     bash "$0" "$@"
 unset IS_CLEAN_ENVIRONMENT
 
-N_CORES=${N_CORES-$(($(getconf _NPROCESSORS_ONLN) / 2))}
+# c.f. https://stackoverflow.com/a/23378780/5769446
+N_CORES="$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"
+echo "Using $N_CORES processes..."
 
 # helpers ##############################################################
 

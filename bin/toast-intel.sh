@@ -8,11 +8,14 @@ set -e
 # customize these
 CONDAMPI=true
 AATMVERSION=0.5
-P=${P-$(($(getconf _NPROCESSORS_ONLN) / 2))}
 ENVNAME=toast-intel-fftw
 prefix="$SCRATCH/local/$ENVNAME"
 # * assume FFTW from system's package manager
 FFTWPATH=/usr
+
+# c.f. https://stackoverflow.com/a/23378780/5769446
+P="${P-$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)}"
+echo "Using $P processes..."
 
 mkdir -p "$prefix" && cd "$prefix"
 

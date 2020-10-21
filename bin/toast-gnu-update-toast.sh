@@ -10,12 +10,15 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # CONDAMPI=True
 # SYSTEMFFTW=True
 AATMVERSION=0.5
-P=${P-$(($(getconf _NPROCESSORS_ONLN) / 2))}
 ENVNAME=toast-gnu
 prefixBase="$SCRATCH/local/$ENVNAME"
 prefixDownload="$prefixBase/git"
 prefixCompile="$prefixBase/compile"
 prefixConda="$prefixBase/conda"
+
+# c.f. https://stackoverflow.com/a/23378780/5769446
+P="${P-$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)}"
+echo "Using $P processes..."
 
 # on macOS try this for dependencies
 # brew install fftw cfitsio suite-sparse
