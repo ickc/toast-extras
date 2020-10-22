@@ -51,7 +51,7 @@ check_var () {
 
 # getopts ##############################################################
 
-version='0.1.5'
+version='0.1.6'
 
 usage="${BASH_SOURCE[0]} [-mh] [-p prefix] --- Install TOAST software stack through conda
 
@@ -109,6 +109,7 @@ dependencies:
 - scipy
 - matplotlib
 - pyephem
+- h5py
 - healpy
 - numba
 - toml
@@ -133,10 +134,10 @@ dependencies:
 - suitesparse
 - automake
 - libtool
-- libgfortran
 - libblas=*=*mkl
 - liblapack=*=*mkl
 - lapack
+- compilers
 - pip
 - pip:
   - quaternionarray
@@ -193,6 +194,7 @@ print_line
 echo 'Running configure...'
 FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
 CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+MPIFC=mpifort \
 ./configure --prefix="$PREFIX"
 
 print_line
