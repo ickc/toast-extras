@@ -53,12 +53,13 @@ check_var () {
 
 version='0.1.6'
 
-usage="${BASH_SOURCE[0]} [-mh] [-p prefix] --- Install TOAST software stack through conda
+usage="${BASH_SOURCE[0]} [-mUh] [-p prefix] --- Install TOAST software stack through conda
 
 where:
     -h  show this help message
     -p  prefix directory
     -m  avoid git clone and compile whenever possible. e.g. you won't be able to develop TOAST.
+    -U  Upgrade environments (to master for git repositories.)
 
 version: $version
 "
@@ -67,11 +68,15 @@ version: $version
 OPTIND=1
 
 # get the options
-while getopts "p:mh" opt; do
+while getopts "p:mUh" opt; do
     case "$opt" in
     p)  PREFIX="$OPTARG"
         ;;
     m)  MINIMAL=1
+        ;;
+    U)  UPGRADE=1
+        printf "Upgrade not implemented."
+        exit 1
         ;;
     h)  printf "$usage"
         exit 0
@@ -147,6 +152,10 @@ EOF
 
 "$CONDA_PREFIX/bin/conda" env create -f env.yml -p "$PREFIX"
 
+}
+
+upgrade_conda () {
+    . "$CONDA_PREFIX/bin/activate" "$PREFIX"
 }
 
 install_ipykernel () {
