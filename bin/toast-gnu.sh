@@ -6,37 +6,40 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # customize these
-# CONDAMPI=True
+CONDAMPI=True
 SYSTEMFFTW=True
 ENVNAME=toast-gnu
 prefixBase="$SCRATCH/local/$ENVNAME"
 prefixDownload="$prefixBase/git"
 prefixCompile="$prefixBase/compile"
 prefixConda="$prefixBase/conda"
+# set MAMBA to conda if you don't have mamba
+MAMBA="${MAMBA-mamba}"
 
 # c.f. https://stackoverflow.com/a/23378780/5769446
 P="${P-$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)}"
 echo "Using $P processes..."
 
-# on macOS try this for dependencies
-# brew install fftw cfitsio suite-sparse
-# note that homebrew consistenly uses open-mpi
-# see https://github.com/Homebrew/homebrew-core/issues/36871
-# compile from source to force open-mpi built with gcc
-# brew install mpich fftw gmp --build-from-source
-
 if [[ $(uname) == Darwin ]]; then
-    GCC=gcc-9
-    GXX=g++-9
-    MPIFORT=/usr/local/bin/mpifort
+    # assuming macports, do these if you haven't yet
+    # sudo port install gcc10 mpich mpich-gcc10 fftw-3 cfitsio SuiteSparse
+    GCC=gcc-mp-10
+    GXX=g++-mp-10
+    MPIFORT=mpifort-mpich-mp
+    MPICC=mpicc-mpich-gcc10
+    MPICXX=mpicxx-mpich-gcc10
+    # if you do
+    # sudo port select --set gcc mp-gcc10
+    # sudo port select --set mpi mpich-gcc10
+    # then the linux setup below can also be used in macOS
 else
     GCC=gcc
     GXX=g++
     MPIFORT=mpifort
+    MPICC=mpicc
+    MPICXX=mpicxx
 fi
 
-MPICC=mpicc
-MPICXX=mpicxx
 
 mkdir -p "$prefixDownload"
 mkdir -p "$prefixCompile"
@@ -48,15 +51,14 @@ cd "$prefixConda"
 
 cat << EOF > env.yml
 channels:
-- defaults
 - conda-forge
 dependencies:
-- python=3
+- python=3.8
 - ipykernel
 - numpy
 - scipy
 - matplotlib
-- pyephem
+- ephem
 - healpy
 - numba
 - toml
@@ -67,13 +69,15 @@ dependencies:
 - nbformat
 - astropy
 - configobj
+- pysm3
 EOF
 
 if [[ -n "$CONDAMPI" ]]; then
     echo '- mpi4py' >> env.yml
+    echo '- mpich=3.3.*=external_*' >> env.yml
 fi
 
-conda env create -f env.yml -p "$prefixConda"
+"$MAMBA" env create -f env.yml -p "$prefixConda"
 # rm -f env.yml
 
 . activate "$prefixConda"
@@ -131,9 +135,9 @@ MPICC=$MPICC \
 CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
 ./configure \
     --with-fftw="$FFTWPATH" \
-    --with-blas='-L/usr/local/opt/openblas/lib -I/usr/local/opt/openblas/include' \
-    --with-lapack='-L/usr/local/opt/lapack/lib -I/usr/local/opt/lapack/include' \
-    --with-cfitsio='/usr/local/Cellar/cfitsio/3.450_1' \
+    --with-blas='-L/opt/local/lib -I/opt/local/include' \
+    --with-lapack='-L/opt/local/lib -I/opt/local/include' \
+    --with-cfitsio='/opt/local/lib' \
     --prefix="$prefixCompile"
 else
 FC=gfortran \
@@ -182,16 +186,6 @@ cd python
 LIBSHARP="$prefixCompile" CC="$MPICC -g" LDSHARED="$MPICC -g -shared" \
     python setup.py install --prefix="$prefixConda"
 
-# PySM ##########################################################################################
-
-cd "$prefixDownload"
-git clone https://github.com/healpy/pysm.git
-cd pysm
-
-pip install -e .
-
-conda deactivate
-
 # libconviqt #####################################################################################
 
 cd "$prefixDownload"
@@ -239,9 +233,9 @@ mkdir -p build
 cd build
 
 if [[ $(uname) == Darwin ]]; then
-    export LDFLAGS="-L/usr/local/opt/openblas/lib -L/usr/local/opt/lapack/lib"
-    export CPPFLAGS="-I/usr/local/opt/openblas/include -I/usr/local/opt/lapack/include"
-    export PKG_CONFIG_PATH="/usr/local/opt/openblas/lib/pkgconfig:/usr/local/opt/lapack/lib/pkgconfig:$PKG_CONFIG_PATH"
+    export LDFLAGS="-L/opt/local/lib"
+    export CPPFLAGS="-I/opt/local/include"
+    export PKG_CONFIG_PATH="/opt/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
 cmake \
@@ -264,3 +258,4 @@ make install
 export PYTHONPATH="$(realpath $prefixCompile/lib/python*/site-packages):$PYTHONPATH"
 
 python -c 'from toast.tests import run; run()'
+echo "finished TOAST test. You may want to cleanup $PWD/toast_test_output"
