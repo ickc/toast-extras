@@ -130,6 +130,8 @@ dependencies:
 - astropy
 - configobj
 - mpi4py
+- pysm3
+- libsharp
 - mpich-mpicc
 - mpich-mpicxx
 - mpich-mpifort
@@ -161,29 +163,6 @@ upgrade_conda () {
 install_ipykernel () {
     local ENVNAME="${PREFIX##*/}"
     python -m ipykernel install --user --name "$ENVNAME" --display-name "$ENVNAME"
-}
-
-# PySM #################################################################
-
-install_pysm () {
-    if [[ -z "$MINIMAL" ]]; then
-        {
-            cd "$PREFIX/git"
-            git clone git@github.com:healpy/pysm.git ||
-            git clone https://github.com/healpy/pysm.git
-            cd pysm
-
-            # on comet it has strange permission errors if it is a git repo
-            pip install -e .
-        } || {
-            printf "%s\\n" "Cannot install pysm from git, try again from zip..." >&2
-            cd "$PREFIX/git"
-            rm -rf "$PREFIX/git/pysm"
-            pip install https://github.com/healpy/pysm/archive/master.zip
-        }
-    else
-        pip install https://github.com/healpy/pysm/archive/master.zip
-    fi
 }
 
 # libmadam #############################################################
@@ -222,47 +201,6 @@ python setup.py install
 print_line
 echo 'Run libmadam test...'
 python setup.py test
-
-)
-
-# libsharp #############################################################
-
-install_libsharp () (
-
-cd "$PREFIX/git"
-git clone git@github.com:Libsharp/libsharp.git --branch master --single-branch --depth 1 ||
-git clone https://github.com/Libsharp/libsharp --branch master --single-branch --depth 1
-cd libsharp
-
-print_line
-echo 'Running autoreconf...'
-autoreconf
-
-print_line
-echo 'Running configure...'
-CC="$CC" \
-CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-./configure --enable-mpi --enable-pic --prefix="$PREFIX"
-
-print_line
-echo 'Running make...'
-make -j"$N_CORES"
-
-print_line
-echo "Installing by copying to $PREFIX..."
-# force overwrite in case it was installed previously
-# explicit path to override shell alias
-/usr/bin/cp -af auto/* "$PREFIX"
-
-print_line
-echo 'Run libsharp test...'
-make test
-
-print_line
-echo 'Installing libsharp Python wrapper...'
-cd python
-LIBSHARP="$PREFIX" CC="$(command -v mpicc) -g" LDSHARED="$(command -v mpicc) -g -shared" \
-    python setup.py install --prefix="$PREFIX"
 
 )
 
@@ -345,20 +283,10 @@ main () (
     echo 'Installing ipython kernel...'
     install_ipykernel
 
-    # PySM
-    print_double_line
-    echo 'Installing pysm...'
-    install_pysm
-
     # libmadam
     print_double_line
     echo 'Installing libmadam...'
     install_libmadam
-
-    # libsharp
-    print_double_line
-    echo 'Installing libsharp...'
-    install_libsharp || echo 'Having trouble installing libsharp, skipping...'
 
     # toast
     print_double_line
