@@ -35,6 +35,8 @@ if [[ "$UNAME" == Darwin ]]; then
     # sudo port select --set mpi mpich-gcc10
     # then the linux setup below can also be used in macOS
 else
+    # on ubuntu try this for dep
+    # gfortran autoconf automake libtool m4 cmake python3 python3-dev python3-tk python3-pip zlib1g-dev libbz2-dev libopenblas-dev liblapack-dev libboost-all-dev libcfitsio-dev libfftw3-dev libhdf5-dev libflac-dev libsuitesparse-dev
     GCC=gcc
     GXX=g++
     FC=gfortran
