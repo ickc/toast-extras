@@ -6,6 +6,10 @@ set -e
 
 # Initialize parameters
 PREFIX="${PREFIX-"$SCRATCH/local/toast-conda"}"
+# set MAMBA to conda if you don't have mamba
+MAMBA="${MAMBA-mamba}"
+# c.f. https://stackoverflow.com/a/23378780/5769446
+N_CORES="${N_CORES-"$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"}"
 
 # c.f. https://unix.stackexchange.com/a/98846
 [[ -z "$IS_CLEAN_ENVIRONMENT" ]] &&
@@ -13,13 +17,13 @@ exec /usr/bin/env -i \
     IS_CLEAN_ENVIRONMENT=1 \
     CONDA_PREFIX="$CONDA_PREFIX" \
     PREFIX="$PREFIX" \
+    MAMBA="$MAMBA" \
+    N_CORES="$N_CORES" \
     TERM="$TERM" \
     HOME="$HOME" \
     bash "$0" "$@"
 unset IS_CLEAN_ENVIRONMENT
 
-# c.f. https://stackoverflow.com/a/23378780/5769446
-N_CORES="$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"
 echo "Using $N_CORES processes..."
 
 # helpers ##############################################################
@@ -152,7 +156,7 @@ EOF
 
 [[ -z "$MINIMAL" ]] && echo '- cmake' >> env.yml || echo '- toast' >> env.yml
 
-"$CONDA_PREFIX/bin/conda" env create -f env.yml -p "$PREFIX"
+"$CONDA_PREFIX/bin/$MAMBA" env create -f env.yml -p "$PREFIX"
 
 }
 
