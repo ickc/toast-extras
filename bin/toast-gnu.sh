@@ -43,8 +43,6 @@ else
     MPICXX=mpicxx
 fi
 
-export LD_LIBRARY_PATH="$prefixCompile/lib:$LD_LIBRARY_PATH"
-
 mkdir -p "$prefixDownload"
 mkdir -p "$prefixCompile"
 mkdir -p "$prefixConda"
@@ -58,6 +56,38 @@ print_double_line () {
 print_line () {
     eval printf %.0s- '{1..'"${COLUMNS:-$(tput cols)}"\}
 }
+
+ld_library_path_prepend () {
+    if [[ -d "$1" ]]; then
+        case ":$LD_LIBRARY_PATH:" in
+            *":$1:"*) :;;
+            *) export LD_LIBRARY_PATH="${1}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}";;
+        esac
+    fi
+}
+
+pythonpath_prepend () {
+    if [[ -d "$1" ]]; then
+        case ":$PYTHONPATH:" in
+            *":$1:"*) :;;
+            *) export PYTHONPATH="${1}${PYTHONPATH:+:${PYTHONPATH}}";;
+        esac
+    fi
+}
+
+pkg_config_path_prepend () {
+    if [[ -d "$1" ]]; then
+        case ":$PKG_CONFIG_PATH:" in
+            *":$1:"*) :;;
+            *) export PKG_CONFIG_PATH="${1}${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}";;
+        esac
+    fi
+}
+
+# PATH ##################################################################
+
+ld_library_path_prepend "$prefixCompile/lib"
+[[ $__UNAME == Darwin ]] && ld_library_path_prepend /opt/local/lib/mpich-mp
 
 # Install Python dep. via conda ##################################################################
 
@@ -275,7 +305,7 @@ cd build
 if [[ "$UNAME" == Darwin ]]; then
     export LDFLAGS="-L/opt/local/lib"
     export CPPFLAGS="-I/opt/local/include"
-    export PKG_CONFIG_PATH="/opt/local/lib/pkgconfig:$PKG_CONFIG_PATH"
+    pkg_config_path_prepend /opt/local/lib/pkgconfig
 fi
 
 cmake \
@@ -298,7 +328,7 @@ make install
 
 test_toast () {
 
-export PYTHONPATH="$(realpath $prefixCompile/lib/python*/site-packages):$PYTHONPATH"
+pythonpath_prepend "$(realpath "$prefixCompile"/lib/python*/site-packages)"
 
 python -c 'from toast.tests import run; run()'
 echo "finished TOAST test. You may want to cleanup $PWD/toast_test_output"
