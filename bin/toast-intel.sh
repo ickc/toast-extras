@@ -36,7 +36,7 @@ dependencies:
 - numpy
 - scipy
 - matplotlib
-- pyephem
+- ephem
 - healpy
 - defaults::numba
 - toml
