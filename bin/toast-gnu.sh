@@ -6,7 +6,8 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # customize these
-CONDAMPI=True
+# CONDAMPI=True
+MPIVERSION=3.0.3
 SYSTEMFFTW=True
 ENVNAME=toast-gnu
 prefixBase="$SCRATCH/local/$ENVNAME"
@@ -36,7 +37,8 @@ if [[ "$UNAME" == Darwin ]]; then
     # then the linux setup below can also be used in macOS
 else
     # on ubuntu try this for dep
-    # gfortran autoconf automake libtool m4 cmake python3 python3-dev python3-tk python3-pip zlib1g-dev libbz2-dev libopenblas-dev liblapack-dev libboost-all-dev libcfitsio-dev libfftw3-dev libhdf5-dev libflac-dev libsuitesparse-dev
+    # gfortran autoconf automake libtool m4 cmake python3 python3-dev python3-tk python3-pip zlib1g-dev libbz2-dev libopenblas-dev liblapack-dev libboost-all-dev libcfitsio-dev libfftw3-dev libhdf5-dev libflac-dev libsuitesparse-dev libmetis-dev
+    # optionally install libmkl-dev libmkl-avx512 etc. for MKL
     GCC=gcc
     GXX=g++
     FC=gfortran
@@ -143,12 +145,25 @@ python -m ipykernel install --user --name "$ENVNAME" --display-name "$ENVNAME"
 
 }
 
+# mpi4py ########################################################################################
+
+install_mpi4py () {
+    cd "$prefixDownload"
+    git clone --single-branch --depth 1 https://github.com/mpi4py/mpi4py.git --branch "$MPIVERSION"
+    cd mpi4py
+
+    python setup.py build
+    python setup.py install
+    # test
+    python -c 'from mpi4py import MPI'
+}
+
 # AATM ##########################################################################################
 
 install_aatm () {
 
 cd "$prefixDownload"
-git clone https://github.com/hpc4cmb/libaatm.git
+git clone --single-branch --depth 1 https://github.com/hpc4cmb/libaatm.git
 cd "libaatm"
 
 CC=$GCC \
@@ -170,7 +185,7 @@ install_libmadam () {
 # * assume CFITSIO installed using system's package manager
 
 cd "$prefixDownload"
-git clone git@github.com:hpc4cmb/libmadam.git
+git clone --single-branch --depth 1 git@github.com:hpc4cmb/libmadam.git
 cd libmadam
 
 ./autogen.sh
@@ -220,7 +235,7 @@ install_libsharp () {
 cd "$prefixDownload"
 # cleanup the patch which may have been applied earlier
 rm -rf libsharp
-git clone https://github.com/Libsharp/libsharp --branch v1.0.0 --single-branch --depth 1
+git clone --single-branch --depth 1 https://github.com/Libsharp/libsharp --branch v1.0.0
 cd libsharp
 
 # apply patch. See https://github.com/hpc4cmb/cmbenv/blob/master/pkgs/patch_libsharp
@@ -258,7 +273,7 @@ LIBSHARP="$prefixCompile" CC="$MPICC -g" LDSHARED="$MPICC -g -shared" \
 install_libconviqt () {
 
 cd "$prefixDownload"
-git clone git@github.com:hpc4cmb/libconviqt.git
+git clone --single-branch --depth 1 git@github.com:hpc4cmb/libconviqt.git
 cd libconviqt
 
 ./autogen.sh
@@ -298,7 +313,7 @@ install_toast () {
 # * assume suite-sparse installed using system's package manager
 
 cd "$prefixDownload"
-git clone git@github.com:hpc4cmb/toast.git
+git clone --single-branch --depth 1 git@github.com:hpc4cmb/toast.git
 cd toast
 
 mkdir -p build
@@ -350,8 +365,14 @@ main () (
     . activate "$prefixConda"
 
     # mpi4py
-    # * hardcoded the location of these scripts for now
-    [[ -n "$CONDAMPI" ]] || "$DIR/../../reproducible-os-environments/common/conda/cray-mpi4py.sh"
+    if [[ -z "$CONDAMPI" ]]; then
+        if [[ -n "$NERSC_HOST" ]]; then
+            # * hardcoded the location of these scripts for now
+            "$DIR/../../reproducible-os-environments/common/conda/cray-mpi4py.sh"
+        else
+            echo install_mpi4py
+        fi
+    fi
     if [[ -n "$SYSTEMFFTW" ]]; then
         # * assume FFTW from system's package manager
         [[ "$UNAME" == Darwin ]] && FFTWPATH=/opt/local || FFTWPATH=/usr
