@@ -112,12 +112,12 @@ cat << EOF > env.yml
 channels:
 - conda-forge
 dependencies:
-- python=3
+- python=3.8
 - ipykernel
 - numpy
 - scipy
 - matplotlib
-- pyephem
+- ephem
 - h5py
 - healpy
 - numba
@@ -259,6 +259,7 @@ fi
 print_line
 echo 'Run TOAST test...'
 python -c 'from toast.tests import run; run()'
+echo "finished TOAST test. You may want to cleanup $PWD/toast_test_output"
 
 )
 
