@@ -43,7 +43,7 @@ dependencies:
 - cython
 EOF
 
-if [[ -n "$CONDAMPI" ]]; then
+if [[ -n $CONDAMPI ]]; then
 	echo '- mpi4py' >> env.yml
 fi
 
@@ -54,7 +54,7 @@ rm -f env.yml
 
 # mpi4py
 # * hardcoded the location of this script for now
-[[ -n "$CONDAMPI" ]] || ~/git/source/reproducible-os-environments/common/conda/cray-mpi4py.sh
+[[ -n $CONDAMPI ]] || ~/git/source/reproducible-os-environments/common/conda/cray-mpi4py.sh
 
 # ipython kernel
 python -m ipykernel install --user --name "$ENVNAME" --display-name "$ENVNAME"

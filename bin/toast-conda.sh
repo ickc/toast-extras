@@ -12,7 +12,7 @@ MAMBA="${MAMBA-mamba}"
 N_CORES="${N_CORES-"$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"}"
 
 # c.f. https://unix.stackexchange.com/a/98846
-[[ -z "$IS_CLEAN_ENVIRONMENT" ]] &&
+[[ -z $IS_CLEAN_ENVIRONMENT ]] &&
 	exec /usr/bin/env -i \
 		IS_CLEAN_ENVIRONMENT=1 \
 		CONDA_PREFIX="$CONDA_PREFIX" \
@@ -37,7 +37,7 @@ print_line() {
 }
 
 printerr() {
-	printf "%s\\n" "$@" >&2
+	printf '%s\n' "$@" >&2
 	exit 1
 }
 
@@ -46,11 +46,11 @@ mkdirerr() {
 }
 
 check_file() {
-	[[ -f "$1" ]] && echo "$1 exists." || printerr "$1 not found! $2"
+	[[ -f $1 ]] && echo "$1 exists." || printerr "$1 not found! $2"
 }
 
 check_var() {
-	[[ -n "${!1}" ]] && echo "$1 is defined." || printerr "$1 is not defined! $2"
+	[[ -n ${!1} ]] && echo "$1 is defined." || printerr "$1 is not defined! $2"
 }
 
 # getopts ##############################################################
@@ -160,7 +160,7 @@ dependencies:
   - quaternionarray
 EOF
 
-	[[ -z "$MINIMAL" ]] && echo '- cmake' >> env.yml || echo '- toast' >> env.yml
+	[[ -z $MINIMAL ]] && echo '- cmake' >> env.yml || echo '- toast' >> env.yml
 
 	"$CONDA_PREFIX/bin/$MAMBA" env create -f env.yml -p "$PREFIX"
 
@@ -218,7 +218,7 @@ install_libmadam() (
 
 install_toast() (
 
-	if [[ -z "$MINIMAL" ]]; then
+	if [[ -z $MINIMAL ]]; then
 
 		cd "$PREFIX/git"
 		git clone git@github.com:hpc4cmb/toast.git ||

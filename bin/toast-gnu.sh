@@ -22,7 +22,7 @@ UNAME="$(uname)"
 N_CORES="${N_CORES-$([ "$UNAME" = Darwin ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)}"
 echo "Using $N_CORES processes..."
 
-if [[ "$UNAME" == Darwin ]]; then
+if [[ $UNAME == Darwin ]]; then
 	# assuming macports, do these if you haven't yet
 	# sudo port install gcc10 mpich mpich-gcc10 fftw-3 cfitsio SuiteSparse
 	GCC=gcc-mp-10
@@ -62,7 +62,7 @@ print_line() {
 }
 
 ld_library_path_prepend() {
-	if [[ -d "$1" ]]; then
+	if [[ -d $1 ]]; then
 		case ":$LD_LIBRARY_PATH:" in
 		*":$1:"*) : ;;
 		*) export LD_LIBRARY_PATH="${1}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" ;;
@@ -71,7 +71,7 @@ ld_library_path_prepend() {
 }
 
 pythonpath_prepend() {
-	if [[ -d "$1" ]]; then
+	if [[ -d $1 ]]; then
 		case ":$PYTHONPATH:" in
 		*":$1:"*) : ;;
 		*) export PYTHONPATH="${1}${PYTHONPATH:+:${PYTHONPATH}}" ;;
@@ -80,7 +80,7 @@ pythonpath_prepend() {
 }
 
 pkg_config_path_prepend() {
-	if [[ -d "$1" ]]; then
+	if [[ -d $1 ]]; then
 		case ":$PKG_CONFIG_PATH:" in
 		*":$1:"*) : ;;
 		*) export PKG_CONFIG_PATH="${1}${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}" ;;
@@ -123,12 +123,12 @@ dependencies:
 - h5py
 EOF
 
-	if [[ -n "$CONDAMPI" ]]; then
+	if [[ -n $CONDAMPI ]]; then
 		echo '- mpi4py' >> env.yml
 		echo '- mpich=3.3.*=external_*' >> env.yml
 	fi
 
-	if [[ "$UNAME" == Darwin ]]; then
+	if [[ $UNAME == Darwin ]]; then
 		echo 'Installing libsharp through conda on Darwin...'
 		echo '- libsharp' >> env.yml
 	fi
@@ -190,7 +190,7 @@ install_libmadam() {
 
 	./autogen.sh
 
-	if [[ "$UNAME" == Darwin ]]; then
+	if [[ $UNAME == Darwin ]]; then
 		FC=$MPIFORT \
 			MPIFC=$MPIFORT \
 			FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native -fallow-argument-mismatch" \
@@ -242,7 +242,7 @@ install_libsharp() {
 	wget https://github.com/hpc4cmb/cmbenv/raw/5ce12fc851434d9fc7af74533c4deb1864aa85f0/pkgs/patch_libsharp
 	patch -p1 < patch_libsharp
 	# fix "libtool:   error: unrecognised option: '-static'"
-	if [[ "$UNAME" == Darwin ]]; then
+	if [[ $UNAME == Darwin ]]; then
 		grep -rl libtool | xargs sed -i 's/libtool/\/opt\/local\/bin\/libtool/'
 	fi
 
@@ -318,7 +318,7 @@ install_toast() {
 	mkdir -p build
 	cd build
 
-	if [[ "$UNAME" == Darwin ]]; then
+	if [[ $UNAME == Darwin ]]; then
 		export LDFLAGS="-L/opt/local/lib"
 		export CPPFLAGS="-I/opt/local/include"
 		pkg_config_path_prepend /opt/local/lib/pkgconfig
@@ -364,17 +364,17 @@ main() (
 	. activate "$prefixConda"
 
 	# mpi4py
-	if [[ -z "$CONDAMPI" ]]; then
-		if [[ -n "$NERSC_HOST" ]]; then
+	if [[ -z $CONDAMPI ]]; then
+		if [[ -n $NERSC_HOST ]]; then
 			# * hardcoded the location of these scripts for now
 			"$DIR/../../reproducible-os-environments/common/conda/cray-mpi4py.sh"
 		else
 			echo install_mpi4py
 		fi
 	fi
-	if [[ -n "$SYSTEMFFTW" ]]; then
+	if [[ -n $SYSTEMFFTW ]]; then
 		# * assume FFTW from system's package manager
-		[[ "$UNAME" == Darwin ]] && FFTWPATH=/opt/local || FFTWPATH=/usr
+		[[ $UNAME == Darwin ]] && FFTWPATH=/opt/local || FFTWPATH=/usr
 	else
 		FFTWPATH="$prefixCompile"
 		"$DIR/../../reproducible-os-environments/install/fftw.sh"
@@ -402,7 +402,7 @@ main() (
 	conda deactivate
 
 	# libsharp
-	if [[ "$UNAME" != Darwin ]]; then
+	if [[ $UNAME != Darwin ]]; then
 		print_double_line
 		echo 'Installing libsharp...'
 		install_libsharp
