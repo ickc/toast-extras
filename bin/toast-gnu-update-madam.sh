@@ -4,7 +4,7 @@
 # accompany toast-gnu.sh
 
 set -e
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # customize these
 # CONDAMPI=True
@@ -28,13 +28,13 @@ echo "Using $P processes..."
 # brew install mpich fftw gmp --build-from-source
 
 if [[ $(uname) == Darwin ]]; then
-    GCC=gcc-9
-    GXX=g++-9
-    MPIFORT=/usr/local/bin/mpifort
+	GCC=gcc-9
+	GXX=g++-9
+	MPIFORT=/usr/local/bin/mpifort
 else
-    GCC=gcc
-    GXX=g++
-    MPIFORT=mpifort
+	GCC=gcc
+	GXX=g++
+	MPIFORT=mpifort
 fi
 
 MPICC=mpicc
@@ -50,29 +50,29 @@ cd libmadam
 ./autogen.sh
 
 if [[ $(uname) == Darwin ]]; then
-LD_LIBRARY_PATH=$prefixCompile/lib \
-FC=gfortran-9 \
-MPIFC=$MPIFORT \
-FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-CC=$GCC \
-MPICC=$MPICC \
-CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-./configure \
-    --with-fftw="$FFTWPATH" \
-    --with-blas='-L/usr/local/opt/openblas/lib -I/usr/local/opt/openblas/include' \
-    --with-lapack='-L/usr/local/opt/lapack/lib -I/usr/local/opt/lapack/include' \
-    --with-cfitsio='/usr/local/Cellar/cfitsio/3.450_1' \
-    --prefix="$prefixCompile"
+	LD_LIBRARY_PATH=$prefixCompile/lib \
+		FC=gfortran-9 \
+		MPIFC=$MPIFORT \
+		FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+		CC=$GCC \
+		MPICC=$MPICC \
+		CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+		./configure \
+		--with-fftw="$FFTWPATH" \
+		--with-blas='-L/usr/local/opt/openblas/lib -I/usr/local/opt/openblas/include' \
+		--with-lapack='-L/usr/local/opt/lapack/lib -I/usr/local/opt/lapack/include' \
+		--with-cfitsio='/usr/local/Cellar/cfitsio/3.450_1' \
+		--prefix="$prefixCompile"
 else
-FC=gfortran \
-MPIFC=$MPIFORT \
-FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-CC=$GCC \
-MPICC=$MPICC \
-CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-./configure \
-    --with-fftw="$FFTWPATH" \
-    --prefix="$prefixCompile"
+	FC=gfortran \
+		MPIFC=$MPIFORT \
+		FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+		CC=$GCC \
+		MPICC=$MPICC \
+		CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+		./configure \
+		--with-fftw="$FFTWPATH" \
+		--prefix="$prefixCompile"
 fi
 
 make -j$P

@@ -44,7 +44,7 @@ dependencies:
 EOF
 
 if [[ -n "$CONDAMPI" ]]; then
-    echo '- mpi4py' >> env.yml
+	echo '- mpi4py' >> env.yml
 fi
 
 conda env create -f env.yml -p "$prefix"
@@ -71,11 +71,11 @@ cd "aatm-$AATMVERSION"
 
 # somehow icc doesn't work here
 CC=gcc \
-CXX=g++ \
-CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-CXXFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
-./configure \
-    --prefix="$prefix"
+	CXX=g++ \
+	CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+	CXXFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
+	./configure \
+	--prefix="$prefix"
 
 make -j$P
 make install
@@ -91,14 +91,14 @@ cd libmadam
 ./autogen.sh
 
 FC=ifort \
-MPIFC=mpiifort \
-FCFLAGS="-O3 -g -fPIC -march=native -mtune=native -fexceptions -pthread -heap-arrays 16" \
-CC=icc \
-MPICC=mpiicc \
-CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-./configure \
-    --with-fftw="$FFTWPATH" \
-    --prefix="$prefix"
+	MPIFC=mpiifort \
+	FCFLAGS="-O3 -g -fPIC -march=native -mtune=native -fexceptions -pthread -heap-arrays 16" \
+	CC=icc \
+	MPICC=mpiicc \
+	CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+	./configure \
+	--with-fftw="$FFTWPATH" \
+	--prefix="$prefix"
 
 make -j$P
 make install
@@ -124,15 +124,15 @@ autoreconf
 
 # libsharp doesn't work with mpiicc
 CC=mpiicc \
-CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-./configure --enable-mpi --enable-pic --prefix="$prefix"
+	CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+	./configure --enable-mpi --enable-pic --prefix="$prefix"
 make -j$P
 # force overwrite in case it was installed previously
 # explicit path to override shell alias
 /usr/bin/cp -af auto/* "$prefix"
 cd python
 LIBSHARP="$prefix" CC="mpiicc -g" LDSHARED="mpiicc -g -shared" \
-    python setup.py install --prefix="$prefix"
+	python setup.py install --prefix="$prefix"
 
 # toast ##########################################################################################
 
@@ -146,17 +146,17 @@ mkdir -p build
 cd build
 
 cmake \
-    -DCMAKE_C_COMPILER=icc \
-    -DCMAKE_CXX_COMPILER=icpc \
-    -DMPI_C_COMPILER=mpiicc \
-    -DMPI_CXX_COMPILER=mpiicpc \
-    -DCMAKE_C_FLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-    -DCMAKE_CXX_FLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
-    -DPYTHON_EXECUTABLE:FILEPATH=$(which python) \
-    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-    -DCMAKE_INSTALL_PREFIX="$prefix" \
-    -DFFTW_ROOT="$FFTWPATH" \
-    ..
+	-DCMAKE_C_COMPILER=icc \
+	-DCMAKE_CXX_COMPILER=icpc \
+	-DMPI_C_COMPILER=mpiicc \
+	-DMPI_CXX_COMPILER=mpiicpc \
+	-DCMAKE_C_FLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+	-DCMAKE_CXX_FLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
+	-DPYTHON_EXECUTABLE:FILEPATH=$(which python) \
+	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	-DCMAKE_INSTALL_PREFIX="$prefix" \
+	-DFFTW_ROOT="$FFTWPATH" \
+	..
 
 make -j$P
 make install

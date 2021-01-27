@@ -4,7 +4,7 @@
 # accompany toast-gnu.sh
 
 set -e
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # customize these
 # CONDAMPI=True
@@ -31,13 +31,13 @@ date=$(date +%Y%m%d)
 # brew install mpich fftw gmp --build-from-source
 
 if [[ $(uname) == Darwin ]]; then
-    GCC=gcc-9
-    GXX=g++-9
-    MPIFORT=/usr/local/bin/mpifort
+	GCC=gcc-9
+	GXX=g++-9
+	MPIFORT=/usr/local/bin/mpifort
 else
-    GCC=gcc
-    GXX=g++
-    MPIFORT=mpifort
+	GCC=gcc
+	GXX=g++
+	MPIFORT=mpifort
 fi
 
 MPICC=mpicc
@@ -51,10 +51,10 @@ mkdir -p "build-$date"
 cd "build-$date"
 
 CC=$GCC \
-CXX=$GXX \
-CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-CXXFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
-cmake -DCMAKE_INSTALL_PREFIX="$prefixCompile" ..
+	CXX=$GXX \
+	CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+	CXXFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
+	cmake -DCMAKE_INSTALL_PREFIX="$prefixCompile" ..
 
 make -j$P
 make test

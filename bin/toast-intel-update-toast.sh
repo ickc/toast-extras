@@ -35,17 +35,17 @@ mkdir -p "build-$date"
 cd "build-$date"
 
 cmake \
-    -DCMAKE_C_COMPILER=icc \
-    -DCMAKE_CXX_COMPILER=icpc \
-    -DMPI_C_COMPILER=mpiicc \
-    -DMPI_CXX_COMPILER=mpiicpc \
-    -DCMAKE_C_FLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-    -DCMAKE_CXX_FLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
-    -DPYTHON_EXECUTABLE:FILEPATH=$(which python) \
-    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-    -DCMAKE_INSTALL_PREFIX="$prefix" \
-    -DFFTW_ROOT="$FFTWPATH" \
-    ..
+	-DCMAKE_C_COMPILER=icc \
+	-DCMAKE_CXX_COMPILER=icpc \
+	-DMPI_C_COMPILER=mpiicc \
+	-DMPI_CXX_COMPILER=mpiicpc \
+	-DCMAKE_C_FLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+	-DCMAKE_CXX_FLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread -std=c++11" \
+	-DPYTHON_EXECUTABLE:FILEPATH=$(which python) \
+	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	-DCMAKE_INSTALL_PREFIX="$prefix" \
+	-DFFTW_ROOT="$FFTWPATH" \
+	..
 
 make -j$P
 make install

@@ -4,7 +4,7 @@
 # accompany toast-intel.sh
 
 set -e
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # customize these
 # CONDAMPI=True
@@ -28,13 +28,13 @@ echo "Using $P processes..."
 # brew install mpich fftw gmp --build-from-source
 
 if [[ $(uname) == Darwin ]]; then
-    GCC=gcc-9
-    GXX=g++-9
-    MPIFORT=/usr/local/bin/mpifort
+	GCC=gcc-9
+	GXX=g++-9
+	MPIFORT=/usr/local/bin/mpifort
 else
-    GCC=gcc
-    GXX=g++
-    MPIFORT=mpifort
+	GCC=gcc
+	GXX=g++
+	MPIFORT=mpifort
 fi
 
 MPICC=mpicc
@@ -60,23 +60,23 @@ mkdir -p "build-$date"
 cd "build-$date"
 
 if [[ $(uname) == Darwin ]]; then
-    export LDFLAGS="-L/usr/local/opt/openblas/lib -L/usr/local/opt/lapack/lib"
-    export CPPFLAGS="-I/usr/local/opt/openblas/include -I/usr/local/opt/lapack/include"
-    export PKG_CONFIG_PATH="/usr/local/opt/openblas/lib/pkgconfig:/usr/local/opt/lapack/lib/pkgconfig:$PKG_CONFIG_PATH"
+	export LDFLAGS="-L/usr/local/opt/openblas/lib -L/usr/local/opt/lapack/lib"
+	export CPPFLAGS="-I/usr/local/opt/openblas/include -I/usr/local/opt/lapack/include"
+	export PKG_CONFIG_PATH="/usr/local/opt/openblas/lib/pkgconfig:/usr/local/opt/lapack/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
 cmake \
-    -DCMAKE_C_COMPILER=$GCC \
-    -DCMAKE_CXX_COMPILER=$GXX \
-    -DMPI_C_COMPILER=$MPICC \
-    -DMPI_CXX_COMPILER=$MPICXX \
-    -DCMAKE_C_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-    -DCMAKE_CXX_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-    -DPYTHON_EXECUTABLE:FILEPATH="$prefixConda/bin/python" \
-    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-    -DCMAKE_INSTALL_PREFIX="$prefixCompile" \
-    -DFFTW_ROOT="$FFTWPATH" \
-    ..
+	-DCMAKE_C_COMPILER=$GCC \
+	-DCMAKE_CXX_COMPILER=$GXX \
+	-DMPI_C_COMPILER=$MPICC \
+	-DMPI_CXX_COMPILER=$MPICXX \
+	-DCMAKE_C_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+	-DCMAKE_CXX_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+	-DPYTHON_EXECUTABLE:FILEPATH="$prefixConda/bin/python" \
+	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+	-DCMAKE_INSTALL_PREFIX="$prefixCompile" \
+	-DFFTW_ROOT="$FFTWPATH" \
+	..
 
 make -j$P
 make install

@@ -31,14 +31,14 @@ cd libmadam
 ./autogen.sh
 
 FC=ifort \
-MPIFC=mpiifort \
-FCFLAGS="-O3 -g -fPIC -march=native -mtune=native -fexceptions -pthread -heap-arrays 16" \
-CC=icc \
-MPICC=mpiicc \
-CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
-./configure \
-    --with-fftw="$FFTWPATH" \
-    --prefix="$prefix"
+	MPIFC=mpiifort \
+	FCFLAGS="-O3 -g -fPIC -march=native -mtune=native -fexceptions -pthread -heap-arrays 16" \
+	CC=icc \
+	MPICC=mpiicc \
+	CFLAGS="-O3 -g -fPIC -march=native -mtune=native -pthread" \
+	./configure \
+	--with-fftw="$FFTWPATH" \
+	--prefix="$prefix"
 
 make -j$P
 make install
