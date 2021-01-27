@@ -61,7 +61,6 @@ check_var() {
 version='0.1.6'
 
 PREFIX="$SCRATCH/local/toast-conda"
-# set MAMBA to conda if you don't have mamba
 MAMBA=mamba
 
 usage="${BASH_SOURCE[0]} [-nmUh] [-p prefix -c conda] --- Install TOAST software stack through conda
