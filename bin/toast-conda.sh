@@ -80,7 +80,7 @@ version: $version
 OPTIND=1
 
 # get the options
-while getopts "p:mUh" opt; do
+while getopts "p:mnUh" opt; do
 	case "$opt" in
 	p)
 		PREFIX="$OPTARG"
