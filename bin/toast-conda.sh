@@ -8,6 +8,11 @@ set -e
 UNAME="${UNAME-$(uname)}"
 # c.f. https://stackoverflow.com/a/23378780/5769446
 N_CORES="${N_CORES-"$([[ $UNAME == Darwin ]] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"}"
+if [[ $UNAME == Linux ]] && (lscpu | grep -q AuthenticAMD); then
+	NOMKL=1
+else
+	NOMKL=0
+fi
 
 # c.f. https://unix.stackexchange.com/a/98846
 [[ -z $IS_CLEAN_ENVIRONMENT ]] &&
@@ -16,6 +21,7 @@ N_CORES="${N_CORES-"$([[ $UNAME == Darwin ]] && sysctl -n hw.physicalcpu_max || 
 		CONDA_PREFIX="$CONDA_PREFIX" \
 		UNAME="$UNAME" \
 		N_CORES="$N_CORES" \
+		NOMKL="$NOMKL" \
 		TERM="$TERM" \
 		HOME="$HOME" \
 		bash "$0" "$@"
@@ -58,12 +64,13 @@ PREFIX="$SCRATCH/local/toast-conda"
 # set MAMBA to conda if you don't have mamba
 MAMBA=mamba
 
-usage="${BASH_SOURCE[0]} [-mUh] [-p prefix -c conda] --- Install TOAST software stack through conda
+usage="${BASH_SOURCE[0]} [-nmUh] [-p prefix -c conda] --- Install TOAST software stack through conda
 
 where:
     -h  show this help message
     -p  prefix directory. Default: $PREFIX
     -c  choose conda package solver. Valid options: conda, mamba. Default: $MAMBA
+    -n  if specified, request nomkl for conda packages. Automatically specified if AMD CPU is detected.
     -m  avoid git clone and compile whenever possible. e.g. you won't be able to develop TOAST.
     -U  Upgrade environments (to master for git repositories.)
 
@@ -81,6 +88,9 @@ while getopts "p:mUh" opt; do
 		;;
 	m)
 		MINIMAL=1
+		;;
+	n)
+		NOMKL=1
 		;;
 	U)
 		UPGRADE=1
@@ -163,6 +173,9 @@ dependencies:
 EOF
 
 	[[ -z $MINIMAL ]] && echo '- cmake' >> env.yml || echo '- toast' >> env.yml
+	if [[ $NOMKL == 1 ]]; then
+		echo '- nomkl' >> env.yml
+	fi
 
 	"$CONDA_PREFIX/bin/$MAMBA" env create -f env.yml -p "$PREFIX"
 
