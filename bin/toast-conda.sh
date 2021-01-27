@@ -6,8 +6,23 @@ set -e
 
 # Initialize parameters
 UNAME="${UNAME-$(uname)}"
+
 # c.f. https://stackoverflow.com/a/23378780/5769446
-N_CORES="${N_CORES-"$([[ $UNAME == Darwin ]] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"}"
+case "$UNAME" in
+Darwin)
+	N_CORES="$(sysctl -n hw.physicalcpu_max)"
+	;;
+Linux)
+	N_CORES="$(lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"
+	;;
+FreeBSD)
+	N_CORES="$(sysctl -n hw.ncpu)"
+	;;
+*)
+	N_CORES="$(getconf _NPROCESSORS_ONLN 2> /dev/null || getconf NPROCESSORS_ONLN 2> /dev/null || echo 1)"
+	;;
+esac
+
 if [[ $UNAME == Linux ]] && (lscpu | grep -q AuthenticAMD); then
 	NOMKL=1
 else
@@ -26,8 +41,6 @@ fi
 		HOME="$HOME" \
 		bash "$0" "$@"
 unset IS_CLEAN_ENVIRONMENT
-
-echo "Using $N_CORES processes..."
 
 # helpers ##############################################################
 
@@ -49,11 +62,19 @@ mkdirerr() {
 }
 
 check_file() {
-	[[ -f $1 ]] && echo "$1 exists." || printerr "$1 not found! $2"
+	if [[ -f $1 ]]; then
+		echo "$1 exists."
+	else
+		printerr "$1 not found! $2"
+	fi
 }
 
 check_var() {
-	[[ -n ${!1} ]] && echo "$1 is defined." || printerr "$1 is not defined! $2"
+	if [[ -n ${!1} ]]; then
+		echo "$1 is defined."
+	else
+		printerr "$1 is not defined! $2"
+	fi
 }
 
 # getopts ##############################################################
@@ -63,12 +84,13 @@ version='0.1.6'
 PREFIX="$SCRATCH/local/toast-conda"
 MAMBA=mamba
 
-usage="${BASH_SOURCE[0]} [-nmUh] [-p prefix -c conda] --- Install TOAST software stack through conda
+usage="${BASH_SOURCE[0]} [-nmUh] [-p prefix -c conda -j processes] --- Install TOAST software stack through conda
 
 where:
     -h  show this help message
     -p  prefix directory. Default: $PREFIX
     -c  choose conda package solver. Valid options: conda, mamba. Default: $MAMBA
+    -j  no of processes used in make. Default: $N_CORES
     -n  if specified, request nomkl for conda packages. Automatically specified if AMD CPU is detected.
     -m  avoid git clone and compile whenever possible. e.g. you won't be able to develop TOAST.
     -U  Upgrade environments (to master for git repositories.)
@@ -80,10 +102,16 @@ version: $version
 OPTIND=1
 
 # get the options
-while getopts "p:mnUh" opt; do
+while getopts "p:c:j:mnUh" opt; do
 	case "$opt" in
 	p)
 		PREFIX="$OPTARG"
+		;;
+	c)
+		MAMBA="$OPTARG"
+		;;
+	j)
+		N_CORES="$OPTARG"
 		;;
 	m)
 		MINIMAL=1
@@ -93,19 +121,21 @@ while getopts "p:mnUh" opt; do
 		;;
 	U)
 		UPGRADE=1
-		printf "Upgrade not implemented."
+		echo 'Upgrade not implemented.'
 		exit 1
 		;;
 	h)
-		printf "$usage"
+		printf '%s\n' "$usage"
 		exit 0
 		;;
 	*)
-		printf "$usage"
+		printf '%s\n' "$usage"
 		exit 1
 		;;
 	esac
 done
+
+echo "Using $N_CORES processes..."
 
 # intro ################################################################
 
@@ -171,7 +201,11 @@ dependencies:
   - quaternionarray
 EOF
 
-	[[ -z $MINIMAL ]] && echo '- cmake' >> env.yml || echo '- toast' >> env.yml
+	if [[ -n $MINIMAL ]]; then
+		echo '- toast' >> env.yml
+	else
+		echo '- cmake' >> env.yml
+	fi
 	if [[ $NOMKL == 1 ]]; then
 		echo '- nomkl' >> env.yml
 	fi
@@ -242,7 +276,11 @@ install_toast() (
 		mkdir -p build
 		cd build
 
-		[[ $UNAME == Darwin ]] && LIBEXT=dylib || LIBEXT=so
+		if [[ $UNAME == Darwin ]]; then
+			LIBEXT=dylib
+		else
+			LIBEXT=so
+		fi
 
 		print_line
 		echo 'Running cmake...'
