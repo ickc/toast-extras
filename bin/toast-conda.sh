@@ -5,9 +5,6 @@ set -e
 # start with a clean environment #######################################
 
 # Initialize parameters
-PREFIX="${PREFIX-"$SCRATCH/local/toast-conda"}"
-# set MAMBA to conda if you don't have mamba
-MAMBA="${MAMBA-mamba}"
 UNAME="${UNAME-$(uname)}"
 # c.f. https://stackoverflow.com/a/23378780/5769446
 N_CORES="${N_CORES-"$([[ $UNAME == Darwin ]] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"}"
@@ -17,8 +14,6 @@ N_CORES="${N_CORES-"$([[ $UNAME == Darwin ]] && sysctl -n hw.physicalcpu_max || 
 	exec /usr/bin/env -i \
 		IS_CLEAN_ENVIRONMENT=1 \
 		CONDA_PREFIX="$CONDA_PREFIX" \
-		PREFIX="$PREFIX" \
-		MAMBA="$MAMBA" \
 		UNAME="$UNAME" \
 		N_CORES="$N_CORES" \
 		TERM="$TERM" \
@@ -59,11 +54,16 @@ check_var() {
 
 version='0.1.6'
 
-usage="${BASH_SOURCE[0]} [-mUh] [-p prefix] --- Install TOAST software stack through conda
+PREFIX="$SCRATCH/local/toast-conda"
+# set MAMBA to conda if you don't have mamba
+MAMBA=mamba
+
+usage="${BASH_SOURCE[0]} [-mUh] [-p prefix -c conda] --- Install TOAST software stack through conda
 
 where:
     -h  show this help message
-    -p  prefix directory
+    -p  prefix directory. Default: $PREFIX
+    -c  choose conda package solver. Valid options: conda, mamba. Default: $MAMBA
     -m  avoid git clone and compile whenever possible. e.g. you won't be able to develop TOAST.
     -U  Upgrade environments (to master for git repositories.)
 
