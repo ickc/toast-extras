@@ -193,8 +193,6 @@ dependencies:
 - suitesparse
 - automake
 - libtool
-- libblas=*=*mkl
-- liblapack=*=*mkl
 - lapack
 - compilers
 - pip
@@ -209,6 +207,11 @@ EOF
 	fi
 	if [[ $NOMKL == 1 ]]; then
 		echo '- nomkl' >> env.yml
+		echo '- libblas' >> env.yml
+		echo '- liblapack' >> env.yml
+	else
+		echo '- libblas=*=*mkl' >> env.yml
+		echo '- liblapack=*=*mkl' >> env.yml
 	fi
 
 	"$CONDA_PREFIX/bin/$MAMBA" env create -f env.yml -p "$PREFIX"
