@@ -34,6 +34,7 @@ fi
 	exec /usr/bin/env -i \
 		IS_CLEAN_ENVIRONMENT=1 \
 		CONDA_PREFIX="$CONDA_PREFIX" \
+		SCRATCH="$SCRATCH" \
 		UNAME="$UNAME" \
 		N_CORES="$N_CORES" \
 		NOMKL="$NOMKL" \
