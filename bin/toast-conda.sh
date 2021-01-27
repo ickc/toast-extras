@@ -8,8 +8,9 @@ set -e
 PREFIX="${PREFIX-"$SCRATCH/local/toast-conda"}"
 # set MAMBA to conda if you don't have mamba
 MAMBA="${MAMBA-mamba}"
+UNAME="${UNAME-$(uname)}"
 # c.f. https://stackoverflow.com/a/23378780/5769446
-N_CORES="${N_CORES-"$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"}"
+N_CORES="${N_CORES-"$([[ $UNAME == Darwin ]] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"}"
 
 # c.f. https://unix.stackexchange.com/a/98846
 [[ -z $IS_CLEAN_ENVIRONMENT ]] &&
@@ -18,6 +19,7 @@ N_CORES="${N_CORES-"$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max ||
 		CONDA_PREFIX="$CONDA_PREFIX" \
 		PREFIX="$PREFIX" \
 		MAMBA="$MAMBA" \
+		UNAME="$UNAME" \
 		N_CORES="$N_CORES" \
 		TERM="$TERM" \
 		HOME="$HOME" \
@@ -228,7 +230,7 @@ install_toast() (
 		mkdir -p build
 		cd build
 
-		[[ $(uname) == Darwin ]] && LIBEXT=dylib || LIBEXT=so
+		[[ $UNAME == Darwin ]] && LIBEXT=dylib || LIBEXT=so
 
 		print_line
 		echo 'Running cmake...'
