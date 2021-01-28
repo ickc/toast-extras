@@ -298,8 +298,8 @@ install_toast() (
 			-DCMAKE_C_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
 			-DCMAKE_CXX_COMPILER="$CXX" \
 			-DCMAKE_CXX_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-			-DMPI_C_COMPILER="$(command -v mpicc)" \
-			-DMPI_CXX_COMPILER="$(command -v mpicxx)" \
+			-DMPI_C_COMPILER="$PREFIX/bin/mpicc" \
+			-DMPI_CXX_COMPILER="$PREFIX/bin/mpicxx" \
 			-DPYTHON_EXECUTABLE:FILEPATH="$PREFIX/bin/python" \
 			-DBLAS_LIBRARIES="$PREFIX/lib/libblas.$LIBEXT" \
 			-DLAPACK_LIBRARIES="$PREFIX/lib/liblapack.$LIBEXT" \
