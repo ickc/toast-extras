@@ -188,6 +188,7 @@ dependencies:
 - mpich-mpicxx
 - mpich-mpifort
 - libgcc-ng
+- libgfortran-ng
 - fftw
 - libaatm
 - cfitsio
