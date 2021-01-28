@@ -16,10 +16,11 @@ jobs:
       run |
         . "$HOME/.mambaforge/bin/activate"
         CONDA_PREFIX="$HOME/.mambaforge" bin/toast-conda.sh
+
   macos:
     runs-on:
-    - macOS-10.15
-    - macos-11.0
+      - macOS-10.15
+      - macos-11.0
     steps:
     - uses: actions/checkout@v2
     - name: Install mamba
