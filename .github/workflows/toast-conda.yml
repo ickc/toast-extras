@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install mamba
       run: |
-        wget https://github.com/ickc/reproducible-os-environments/blob/master/install/mamba.sh
+        wget https://github.com/ickc/reproducible-os-environments/raw/master/install/mamba.sh
         chmod +x mamba.sh
         ./mamba.sh
     - name: Install toast-conda
