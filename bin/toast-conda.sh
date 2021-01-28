@@ -246,10 +246,10 @@ install_libmadam() (
 
 	print_line
 	echo 'Running configure...'
-	FC="$PREFIX/bin/gfortran" \
-		MPIFC="$PREFIX/bin/mpifort" \
+	FC=mpifort \
+		MPIFC=mpifort \
 		FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-		CC="$PREFIX/bin/gcc" \
+		CC=$CC \
 		CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
 		./configure --prefix="$PREFIX"
 
@@ -296,12 +296,12 @@ install_toast() (
 		echo 'Running cmake...'
 		cmake \
 			-DCMAKE_INSTALL_PREFIX="$PREFIX" \
-			-DCMAKE_C_COMPILER="$PREFIX/bin/gcc" \
+			-DCMAKE_C_COMPILER="$CC" \
 			-DCMAKE_C_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-			-DCMAKE_CXX_COMPILER="$PREFIX/bin/g++" \
+			-DCMAKE_CXX_COMPILER="$CXX" \
 			-DCMAKE_CXX_FLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-			-DMPI_C_COMPILER="$PREFIX/bin/mpicc" \
-			-DMPI_CXX_COMPILER="$PREFIX/bin/mpicxx" \
+			-DMPI_C_COMPILER="$(command -v mpicc)" \
+			-DMPI_CXX_COMPILER="$(command -v mpicxx)" \
 			-DPYTHON_EXECUTABLE:FILEPATH="$PREFIX/bin/python" \
 			-DBLAS_LIBRARIES="$PREFIX/lib/libblas.$LIBEXT" \
 			-DLAPACK_LIBRARIES="$PREFIX/lib/liblapack.$LIBEXT" \
