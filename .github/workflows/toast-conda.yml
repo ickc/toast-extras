@@ -1,0 +1,32 @@
+name: Test toast-conda
+on: [push, pull_request]
+jobs:
+  linux:
+    runs-on:
+      - ubuntu-16.04
+      - ubuntu-18.04
+      - ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install mamba
+      run: |
+        wget https://github.com/ickc/reproducible-os-environments/blob/master/install/mamba.sh
+        ./mamba.sh
+    - name: Install toast-conda
+      run |
+        . "$HOME/.mambaforge/bin/activate"
+        CONDA_PREFIX="$HOME/.mambaforge" bin/toast-conda.sh
+  macos:
+    runs-on:
+    - macOS-10.15
+    - macos-11.0
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install mamba
+      run: |
+        wget https://github.com/ickc/reproducible-os-environments/blob/master/install/mamba.sh
+        ./mamba.sh
+    - name: Install toast-conda
+      run |
+        . "$HOME/.mambaforge/bin/activate"
+        CONDA_PREFIX="$HOME/.mambaforge" bin/toast-conda.sh
