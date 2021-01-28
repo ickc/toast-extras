@@ -242,9 +242,11 @@ install_libmadam() (
 
 	print_line
 	echo 'Running configure...'
-	FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
-		CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+	FC=mpifort \
 		MPIFC=mpifort \
+		FCFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
+		CC=$CC \
+		CFLAGS="-O3 -fPIC -pthread -march=native -mtune=native" \
 		./configure --prefix="$PREFIX"
 
 	print_line
