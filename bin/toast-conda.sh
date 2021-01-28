@@ -8,25 +8,29 @@ set -e
 UNAME="${UNAME-$(uname)}"
 
 # c.f. https://stackoverflow.com/a/23378780/5769446
-case "$UNAME" in
-Darwin)
-	N_CORES="$(sysctl -n hw.physicalcpu_max)"
-	;;
-Linux)
-	N_CORES="$(lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"
-	;;
-FreeBSD)
-	N_CORES="$(sysctl -n hw.ncpu)"
-	;;
-*)
-	N_CORES="$(getconf _NPROCESSORS_ONLN 2> /dev/null || getconf NPROCESSORS_ONLN 2> /dev/null || echo 1)"
-	;;
-esac
+if [[ -z $N_CORES ]]; then
+	case "$UNAME" in
+	Darwin)
+		N_CORES="$(sysctl -n hw.physicalcpu_max)"
+		;;
+	Linux)
+		N_CORES="$(lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"
+		;;
+	FreeBSD)
+		N_CORES="$(sysctl -n hw.ncpu)"
+		;;
+	*)
+		N_CORES="$(getconf _NPROCESSORS_ONLN 2> /dev/null || getconf NPROCESSORS_ONLN 2> /dev/null || echo 1)"
+		;;
+	esac
+fi
 
-if [[ $UNAME == Linux ]] && (lscpu | grep -q AuthenticAMD); then
-	NOMKL=1
-else
-	NOMKL=0
+if [[ -z $NOMKL ]]; then
+	if [[ $UNAME == Linux ]] && (lscpu | grep -q AuthenticAMD); then
+		NOMKL=1
+	else
+		NOMKL=0
+	fi
 fi
 
 # c.f. https://unix.stackexchange.com/a/98846
@@ -187,8 +191,6 @@ dependencies:
 - mpich-mpicc
 - mpich-mpicxx
 - mpich-mpifort
-- libgcc-ng
-- libgfortran-ng
 - fftw
 - libaatm
 - cfitsio
