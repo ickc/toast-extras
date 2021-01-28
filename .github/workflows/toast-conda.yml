@@ -13,7 +13,7 @@ jobs:
         wget https://github.com/ickc/reproducible-os-environments/blob/master/install/mamba.sh
         ./mamba.sh
     - name: Install toast-conda
-      run |
+      run: |
         . "$HOME/.mambaforge/bin/activate"
         CONDA_PREFIX="$HOME/.mambaforge" bin/toast-conda.sh
 
