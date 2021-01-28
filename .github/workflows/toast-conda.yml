@@ -21,4 +21,4 @@ jobs:
     - name: Install toast-conda
       run: |
         . "$HOME/.mambaforge/bin/activate"
-        CONDA_PREFIX="$HOME/.mambaforge" bin/toast-conda.sh
+        CONDA_PREFIX="$HOME/.mambaforge" bin/toast-conda.sh -p $HOME/.toast-conda
