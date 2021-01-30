@@ -199,9 +199,7 @@ dependencies:
 - libtool
 - lapack
 - compilers
-- pip
-- pip:
-  - quaternionarray
+- quaternionarray
 EOF
 
 	if [[ -n $MINIMAL ]]; then
