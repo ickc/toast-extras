@@ -369,7 +369,7 @@ main() (
 			# * hardcoded the location of these scripts for now
 			"$DIR/../../reproducible-os-environments/common/conda/cray-mpi4py.sh"
 		else
-			echo install_mpi4py
+			install_mpi4py
 		fi
 	fi
 	if [[ -n $SYSTEMFFTW ]]; then
