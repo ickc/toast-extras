@@ -34,6 +34,8 @@ if [[ -z $NOMKL ]]; then
 fi
 
 # c.f. https://unix.stackexchange.com/a/98846
+# CIBUILDWHEEL is used to skipping toast timing test on CI
+# c.f. https://github.com/hpc4cmb/toast/blob/eb1e65097f99ecac63d8976f7131764a43a7ff07/src/toast/tests/runner.py#L113-L117
 [[ -z $IS_CLEAN_ENVIRONMENT ]] &&
 	exec /usr/bin/env -i \
 		IS_CLEAN_ENVIRONMENT=1 \
@@ -44,6 +46,7 @@ fi
 		NOMKL="$NOMKL" \
 		TERM="$TERM" \
 		HOME="$HOME" \
+		CIBUILDWHEEL="$CIBUILDWHEEL" \
 		bash "$0" "$@"
 unset IS_CLEAN_ENVIRONMENT
 
