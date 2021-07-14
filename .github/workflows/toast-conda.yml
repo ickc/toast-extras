@@ -23,3 +23,6 @@ jobs:
       run: |
         . "$HOME/.mambaforge/bin/activate"
         CONDA_PREFIX="$HOME/.mambaforge" bin/toast-conda.sh -p $HOME/.toast-conda
+      env:
+        # c.f. https://github.com/hpc4cmb/toast/blob/eb1e65097f99ecac63d8976f7131764a43a7ff07/src/toast/tests/runner.py#L113-L117
+        CIBUILDWHEEL: 1
