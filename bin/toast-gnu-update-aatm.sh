@@ -17,7 +17,7 @@ prefixCompile="$prefixBase/compile"
 prefixConda="$prefixBase/conda"
 
 # c.f. https://stackoverflow.com/a/23378780/5769446
-P="${P-$([ $(uname) = 'Darwin' ] && sysctl -n hw.physicalcpu_max || lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)}"
+P="${P-$(if [[ "$(uname)" == Darwin ]]; then sysctl -n hw.physicalcpu_max; else lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l; fi)}"
 echo "Using $P processes..."
 
 # for the build directory
