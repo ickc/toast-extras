@@ -13,7 +13,7 @@ jobs:
           - macos-11
           - macOS-10.15
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install mamba
       run: |
         wget https://github.com/ickc/reproducible-os-environments/raw/master/install/mamba.sh
