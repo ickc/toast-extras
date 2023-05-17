@@ -7,27 +7,27 @@ Stuffs related to toast
 Adapt these to your environment,
 
 - prefix to TOAST
-- `python3.7`
+- `python3.10`
 
 ## GNU
 
 ```bash
-# in /scratch/local/toast-gnu/compile/bin/run_kernel.sh
+# in /opt/cmb/toast-gnu/compile/bin/run_kernel.sh
 #!/bin/bash
-conda activate /scratch/local/toast-gnu/conda
+conda activate /opt/cmb/toast-gnu/conda
 
-export LD_LIBRARY_PATH="/scratch/local/toast-gnu/compile/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="/scratch/local/toast-gnu/compile/lib/python3.7/site-packages:$PYTHONPATH"
-export PATH="/scratch/local/toast-gnu/compile/bin:/scratch/local/toast-gnu/conda/bin:$PATH"
+export LD_LIBRARY_PATH="/opt/cmb/toast-gnu/compile/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="/opt/cmb/toast-gnu/compile/lib/python3.10/site-packages:$PYTHONPATH"
+export PATH="/opt/cmb/toast-gnu/compile/bin:/opt/cmb/toast-gnu/conda/bin:$PATH"
 
-exec /scratch/local/toast-gnu/conda/bin/python -m ipykernel_launcher -f "$1"
+exec /opt/cmb/toast-gnu/conda/bin/python -m ipykernel_launcher -f "$1"
 ```
 
 ```json
 # in ~/.local/share/jupyter/kernels/toast-gnu/kernel.json
 {
  "argv": [
-  "/scratch/local/toast-gnu/compile/bin/run_kernel.sh",
+  "/opt/cmb/toast-gnu/compile/bin/run_kernel.sh",
   "{connection_file}"
  ],
  "display_name": "toast-gnu",
@@ -39,9 +39,9 @@ To use it with vscode, (see <https://code.visualstudio.com/docs/python/environme
 
 ```sh
 # ${workspaceFolder}/.env
-LD_LIBRARY_PATH=${SCRATCH}/local/toast-gnu/compile/lib:${LD_LIBRARY_PATH}
-PYTHONPATH=${SCRATCH}/local/toast-gnu/compile/lib/python3.7/site-packages:${PYTHONPATH}
-PATH=${SCRATCH}/local/toast-gnu/compile/bin:${SCRATCH}/local/toast-gnu/conda/bin:${PATH}
+LD_LIBRARY_PATH=/opt/cmb/toast-gnu/compile/lib:${LD_LIBRARY_PATH}
+PYTHONPATH=/opt/cmb/toast-gnu/compile/lib/python3.10/site-packages:${PYTHONPATH}
+PATH=/opt/cmb/toast-gnu/compile/bin:/opt/cmb/toast-gnu/conda/bin:${PATH}
 ```
 
 ## Intel
