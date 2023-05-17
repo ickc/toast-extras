@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 
 # * using the master libmadam and toast
+# TODO: error detection within function not checked
+# TODO: seems like the PATHs setup within test isn't done yet
 
 set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # customize these
 # CONDAMPI=True
-MPIVERSION=3.0.3
+MPIVERSION=3.1.4
 SYSTEMFFTW=True
 ENVNAME=toast-gnu
-prefixBase="$SCRATCH/local/$ENVNAME"
+prefixBase="/opt/cmb/$ENVNAME"
 prefixDownload="$prefixBase/git"
 prefixCompile="$prefixBase/compile"
 prefixConda="$prefixBase/conda"
@@ -103,7 +105,7 @@ install_conda() {
 channels:
 - conda-forge
 dependencies:
-- python=3.8
+- python=3.10
 - ipykernel
 - numpy
 - scipy
@@ -125,7 +127,7 @@ EOF
 
 	if [[ -n $CONDAMPI ]]; then
 		echo '- mpi4py' >> env.yml
-		echo '- mpich=3.3.*=external_*' >> env.yml
+		echo '- mpich=4.1.*=external_*' >> env.yml
 	fi
 
 	if [[ $UNAME == Darwin ]]; then
