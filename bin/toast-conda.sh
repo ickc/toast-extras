@@ -224,7 +224,7 @@ EOF
 }
 
 upgrade_conda() {
-	. "$CONDA_PREFIX/bin/activate" "$PREFIX"
+	. "$CONDA_PREFIX/bin/activate"
 }
 
 install_ipykernel() {
@@ -348,7 +348,7 @@ main() (
 
 	print_double_line
 	echo "Environment created in $PREFIX, activating and installing the ipykernel..."
-	. "$CONDA_PREFIX/bin/activate" "$PREFIX"
+	. "$CONDA_PREFIX/bin/activate"
 
 	print_double_line
 	echo 'Installing ipython kernel...'
